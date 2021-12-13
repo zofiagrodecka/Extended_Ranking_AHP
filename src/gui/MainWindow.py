@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QLabel, QWidget, QMainWindow, QHBoxLayout, QVBoxLayout, QPushButton, \
-    QFileDialog, QLineEdit, QSlider, QGridLayout
+    QFileDialog, QLineEdit, QSlider, QGridLayout, QRadioButton
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
 import csv
@@ -20,6 +20,7 @@ class GUIWindow(QWidget):
         self.criteria = []
         self.alternatives = []
         self.AHPCalculator = None
+        self.choose_method = 0
         self.initGUI()
 
     def initGUI(self):
@@ -32,6 +33,20 @@ class GUIWindow(QWidget):
         self.title.setStyleSheet("color:black; font-size:20px;text-transform:uppercase; text-align:center;")
         self.title.setGeometry(0, 10, 500, 50)
         self.title.setAlignment(Qt.AlignCenter)
+        self.subtitle_p = QLabel(self)
+        self.subtitle_p.setText("Wybierz metodę")
+        self.subtitle_p.setStyleSheet("color:black; font-size:15px;text-transform:uppercase; text-align:center;")
+        self.subtitle_p.setGeometry(0, 50, 500, 50)
+        self.subtitle_p.setAlignment(Qt.AlignCenter)
+        self.method = QWidget(self)
+        self.method_layout = QHBoxLayout()
+        self.choose1 = QRadioButton("EVM")
+        self.choose1.toggled.connect(lambda:self.state(self.choose1))
+        self.choose2 = QRadioButton("GMM")
+        self.choose2.toggled.connect(lambda:self.state(self.choose2))
+        self.method_layout.addWidget(self.choose1)
+        self.method_layout.addWidget(self.choose2)
+        self.method.setLayout(self.method_layout)
         self.subtitle = QLabel(self)
         self.subtitle.setText("Wprowadź parametry:")
         self.subtitle.setStyleSheet("color:black; font-size:15px;text-transform:uppercase; text-align:center;")
@@ -69,6 +84,8 @@ class GUIWindow(QWidget):
         self.forward.setGeometry(170, 270, 150, 30)
         self.forward.clicked.connect(self.processing)
         self.layout.addWidget(self.title)
+        self.layout.addWidget(self.subtitle_p)
+        self.layout.addWidget(self.method)
         self.layout.addWidget(self.subtitle)
         self.layout.addWidget(self.param)
         self.layout.addWidget(self.load)
@@ -108,6 +125,10 @@ class GUIWindow(QWidget):
                 for x in range(len(r)):
                     if r[x] == '':
                         r[x] = 0
+                        if(self.choose_method == 1):
+                            self.choose_method = 3
+                        elif(self.choose_method == 2):
+                            self.choose_method = 4
                 matrixes[i].append(r.astype("float"))
             beg = beg + a
             print(matrixes[i])
@@ -128,7 +149,15 @@ class GUIWindow(QWidget):
 
     def processing(self):
         print("processing")
-        total = self.AHPCalculator.run_incomplete_GMM_method()
+        total = None
+        if(self.choose_method == 1):
+            total = self.AHPCalculator.run_EVM_method()
+        elif(self.choose_method == 2):
+            total = self.AHPCalculator.run_GMM_method()
+        elif (self.choose_method == 3):
+            total = self.AHPCalculator.run_EVM_method()
+        elif (self.choose_method == 4):
+            total = self.AHPCalculator.run_incomplete_GMM_method()
         # total = self.AHPCalculator.run_EVM_method()
         print("Total:", total)
         best_choice = self.AHPCalculator.alternatives_names[numpy.argmax(total)]
@@ -153,8 +182,10 @@ class GUIWindow(QWidget):
         self.layout.itemAt(2).widget().deleteLater()
         self.layout.itemAt(3).widget().deleteLater()
         self.layout.itemAt(4).widget().deleteLater()
+        self.layout.itemAt(5).widget().deleteLater()
+        self.layout.itemAt(6).widget().deleteLater()
         sub_message = "Najlepszą opcją jest " + best_choice
-        self.subtitle.setText(sub_message)
+        self.subtitle_p.setText(sub_message)
 
         sorted_alternatives = []
         result_copy = deepcopy(total)
@@ -187,6 +218,16 @@ class GUIWindow(QWidget):
         self.bottom.setLayout(self.b_layout)
         self.layout.addWidget(self.bottom)
 
+    def state(self, b):
+        if b.text() == "EVM":
+            if b.isChecked() == True:
+                self.choose_method = 1
+                print(self.choose_method)
+
+        if b.text() == "GMM":
+            if b.isChecked() == True:
+                self.choose_method = 2
+                print(self.choose_method)
 
 
 
