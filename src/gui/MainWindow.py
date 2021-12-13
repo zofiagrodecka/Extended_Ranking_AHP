@@ -104,7 +104,11 @@ class GUIWindow(QWidget):
             #matrixes[i] = result[beg:beg + a].astype("float")
             matrixes[i] = []
             for j in range(a):
-                matrixes[i].append(result[beg+j][0:a].astype("float"))
+                r = result[beg+j][0:a]
+                for x in range(len(r)):
+                    if r[x] == '':
+                        r[x] = 0
+                matrixes[i].append(r.astype("float"))
             beg = beg + a
             print(matrixes[i])
             self.AHPCalculator.append_alternative(deepcopy(matrixes[i]))
@@ -112,7 +116,11 @@ class GUIWindow(QWidget):
         c_end = l
         criteria_comparison = [[]]*c
         for i in range(c):
-            criteria_comparison[i] = result[c_beg][0:c].astype("float")
+            r =  result[c_beg][0:c]
+            for x in range(len(r)):
+                if r[x] == '':
+                    r[x] = 0
+            criteria_comparison[i] = r.astype("float")
             c_beg+=1
         criteria_comparison = numpy.array(criteria_comparison)
         self.AHPCalculator.criteria_comparison = deepcopy(criteria_comparison)
@@ -120,7 +128,7 @@ class GUIWindow(QWidget):
 
     def processing(self):
         print("processing")
-        total = self.AHPCalculator.run_GMM_method()
+        total = self.AHPCalculator.run_incomplete_GMM_method()
         # total = self.AHPCalculator.run_EVM_method()
         print("Total:", total)
         best_choice = self.AHPCalculator.alternatives_names[numpy.argmax(total)]

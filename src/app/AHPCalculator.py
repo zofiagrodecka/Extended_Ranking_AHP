@@ -75,3 +75,78 @@ class AHPCalculator:
             print(result[i])
         total = result.sum(axis=0)
         return total
+
+    def calculate_inc_gmm_criteria_priorities(self):
+        l = len(self.criteria_comparison)
+        G = np.zeros((l,l))
+        r = np.zeros(l)
+        for i in range(l):
+            s = 0
+            for x in range(l):
+                if self.criteria_comparison[i][x] == 0:
+                    s = s + 1
+            lnc = 0
+            for j in range(l):
+                if self.criteria_comparison[i][j] == 0 and i != j:
+                    G[i][j] = 1
+                elif self.criteria_comparison[i][j] != 0 and i != j:
+                    G[i][j] = 0
+                    lnc = lnc + np.log(self.criteria_comparison[i][j])
+                elif i == j:
+                    G[i][j] = l - s
+            r[i] = lnc
+        W = np.linalg.inv(G).dot(r)
+        w = np.zeros(len(W))
+        sum_w = 0
+        for e in range(len(W)):
+            w[e] = np.exp(W[e])
+            sum_w = sum_w + w[e]
+        for e in range(len(w)):
+            w[e] = w[e] / sum_w
+        self.criteria_priorities = w
+    def calculate_inc_gmm_alternatives_priorities(self):
+        for matrix in self.alternative_matrixes:
+            l = len(matrix)
+            #print(l)
+            G = np.zeros((l, l))
+            # print(G)
+            r = np.zeros(l)
+            # print(r)
+            for i in range(l):
+                s = 0
+                for x in range(l):
+                    if matrix[i][x] == 0:
+                        s = s +1
+                print(s)
+                lnc = 0
+                for j in range(l):
+                    if matrix[i][j] == 0 and i != j:
+                        G[i][j] = 1
+                    elif matrix[i][j] != 0  and i!=j:
+                        G[i][j] = 0
+                        lnc = lnc + np.log(matrix[i][j])
+                    elif i == j:
+                        G[i][j] = l - s
+                r[i] = lnc
+            print(G)
+            print(r)
+            W = np.linalg.inv(G).dot(r)
+            print(W)
+            w = np.zeros(len(W))
+            sum_w = 0
+            for e in range(len(W)):
+                w[e] = np.exp(W[e])
+                sum_w = sum_w + w[e]
+            for e in range(len(w)):
+                w[e] = w[e]/sum_w
+            print(w)
+            self.alternatives_priorities.append(w)
+        print(self.alternatives_priorities)
+    def run_incomplete_GMM_method(self):
+        self.calculate_inc_gmm_alternatives_priorities()
+        self.calculate_inc_gmm_criteria_priorities()
+        result = self.synthesize_result()
+        for i in range(self.criteria_number):
+            print(result[i])
+        total = result.sum(axis=0)
+        return total
