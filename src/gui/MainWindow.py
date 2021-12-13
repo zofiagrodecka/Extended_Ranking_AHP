@@ -120,13 +120,8 @@ class GUIWindow(QWidget):
 
     def processing(self):
         print("processing")
-        # print(self.AHPCalculator.alternative_matrixes)
-        self.AHPCalculator.calculate_alternatives_priorities()
-        self.AHPCalculator.calculate_criteria_priorities()
-        result = self.AHPCalculator.synthesize_result()
-        for i in range(self.criteria_number):
-            print(result[i])
-        total = result.sum(axis=0)
+        total = self.AHPCalculator.run_GMM_method()
+        # total = self.AHPCalculator.run_EVM_method()
         print("Total:", total)
         best_choice = self.AHPCalculator.alternatives_names[numpy.argmax(total)]
         print("The best choice is:", best_choice)

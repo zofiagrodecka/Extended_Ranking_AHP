@@ -16,19 +16,19 @@ class AHPCalculator:
         self.alternative_matrixes.append(np.array(matrix))
 
     @staticmethod
-    def calculate_priority(matrix):
+    def calculate_evm_priority(matrix):
         matrix /= matrix.sum(axis=0)
         print("Po normalizacji:\n", matrix)
         priority = matrix.mean(axis=1)
         print("Priority:", priority)
         return priority
 
-    def calculate_criteria_priorities(self):
-        self.criteria_priorities = self.calculate_priority(self.criteria_comparison)
+    def calculate_evm_criteria_priorities(self):
+        self.criteria_priorities = self.calculate_evm_priority(self.criteria_comparison)
 
-    def calculate_alternatives_priorities(self):
+    def calculate_evm_alternatives_priorities(self):
         for matrix in self.alternative_matrixes:
-            priority = self.calculate_priority(matrix)
+            priority = self.calculate_evm_priority(matrix)
             self.alternatives_priorities.append(priority)
         print(self.alternatives_priorities)
 
@@ -38,3 +38,40 @@ class AHPCalculator:
             for j in range(self.alternatives_number):
                 result[i][j] = self.alternatives_priorities[i][j] * self.criteria_priorities[i]
         return result
+
+    def run_EVM_method(self):
+        self.calculate_evm_alternatives_priorities()
+        self.calculate_evm_criteria_priorities()
+        result = self.synthesize_result()
+        for i in range(self.criteria_number):
+            print(result[i])
+        total = result.sum(axis=0)
+        return total
+
+    @staticmethod
+    def calculate_gmm_priority(matrix):
+        priority = np.prod(matrix, axis=1)
+        priority = np.power(priority, 1/len(matrix))
+        s = np.sum(priority)
+        priority /= s  # normalization
+        print("Priority:", priority)
+        return priority
+
+    def calculate_gmm_criteria_priorities(self):
+        self.criteria_priorities = self.calculate_gmm_priority(self.criteria_comparison)
+        print(self.criteria_comparison)
+
+    def calculate_gmm_alternatives_priorities(self):
+        for matrix in self.alternative_matrixes:
+            priority = self.calculate_gmm_priority(matrix)
+            self.alternatives_priorities.append(priority)
+        print(self.alternatives_priorities)
+
+    def run_GMM_method(self):
+        self.calculate_gmm_alternatives_priorities()
+        self.calculate_gmm_criteria_priorities()
+        result = self.synthesize_result()
+        for i in range(self.criteria_number):
+            print(result[i])
+        total = result.sum(axis=0)
+        return total
