@@ -2,19 +2,38 @@ import numpy as np
 
 
 class AHPCalculator:
-    def __init__(self, criteria_number, alternative_number, criteria, alternatives):
-        self.criteria_number = criteria_number
-        self.alternatives_number = alternative_number
-        self.criteria_names = criteria
-        self.alternatives_names = alternatives
+    def __init__(self, experts_number):
+        self.criteria_number = None
+        self.alternatives_number = None
+        self.criteria_names = None
+        self.alternatives_names = None
         self.alternative_matrixes = []
         self.criteria_comparison = None
         self.criteria_priorities = []
         self.alternatives_priorities = []
         self.ri = [0, 0, 0, 0.52, 0.89, 1.11, 1.25, 1.35, 1.40, 1.45, 1.49, 1.51, 1.54, 1.56, 1.57, 1.58]
+        self.experts_number = experts_number
+        self.multiple_experts_criteria = []
+        self.multiple_experts_alternatives = [[] for _ in range(self.experts_number)]
+
+    def initialize_alternatives(self, alternatives_number, alternatives):
+        self.alternatives_names = alternatives
+        self.alternatives_number = alternatives_number
+
+    def initialize_criteria(self, criteria_number, criteria):
+        self.criteria_number = criteria_number
+        self.criteria_names = criteria
 
     def append_alternative(self, matrix):
         self.alternative_matrixes.append(np.array(matrix))
+
+    def append_experts_alternative(self, matrix, index):
+        self.multiple_experts_alternatives[index].append(np.array(matrix))
+        print("EXPERTS")
+        print(self.multiple_experts_alternatives)
+
+    def append_experts_criteria(self, matrix):
+        self.multiple_experts_criteria.append(np.array(matrix))
 
     @staticmethod
     def calculate_evm_priority(matrix):
@@ -169,3 +188,18 @@ class AHPCalculator:
             for j in range(n):
                 res += abs(matrix[i][j] - priority[i])
         return res
+
+    def run_multiple_experts_EVM_method(self):  # metoda AIP
+        all_results = []
+        for i in range(self.experts_number):
+            self.criteria_number = len(self.multiple_experts_criteria[i])
+            self.alternative_matrixes = self.multiple_experts_alternatives[i]
+            self.criteria_comparison = self.multiple_experts_criteria[i]
+            all_results.append(self.run_EVM_method())
+        print('ALL RESULTS', all_results)
+        result = np.prod(all_results, axis=0)
+        result = np.power(result, 1 / self.experts_number)
+        return result
+
+    def run_multiple_experts_GMM_method(self):
+        pass

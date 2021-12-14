@@ -21,6 +21,7 @@ class GUIWindow(QWidget):
         self.alternatives = []
         self.AHPCalculator = None
         self.choose_method = 0
+        self.multiple_experts = False
         self.initGUI()
 
     def initGUI(self):
@@ -78,7 +79,7 @@ class GUIWindow(QWidget):
         self.load = QPushButton("Załaduj plik z danymi", self)
         self.load.setStyleSheet("background:#3f3f3f; color:#d1d1d1; text-transform:uppercase;")
         self.load.setGeometry(170, 250, 150, 30)
-        self.load.clicked.connect(self.read_file)
+        self.load.clicked.connect(self.load_files)
         self.forward = QPushButton("Dalej", self)
         self.forward.setStyleSheet("background:#3f3f3f; color:#d1d1d1; text-transform:uppercase;")
         self.forward.setGeometry(170, 270, 150, 30)
@@ -93,8 +94,23 @@ class GUIWindow(QWidget):
         self.setLayout(self.layout)
         self.show()
 
-    def read_file(self):
-        self.criteria_number = int(self.param_edit_1.text())
+    def load_files(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        file_name = QFileDialog()
+        file_name.setFileMode(QFileDialog.ExistingFiles)
+        files, types = file_name.getOpenFileNames(self, "Open files", "")
+        print(files)
+        self.AHPCalculator = AHPCalculator(len(files))
+        if len(files) == 1: # not multiple experts
+            self.read_file(files[0], 0)
+        else:
+            self.multiple_experts = True
+            for i in range(len(files)):
+                self.read_file(files[i], i)
+
+    def read_file(self, file_name, index):
+        """self.criteria_number = int(self.param_edit_1.text())
         self.alternative_number = int(self.param_edit_2.text())
         print("liczba kryterów: ", self.criteria_number)
         print("liczba alternatyw: ", self.alternative_number)
@@ -102,11 +118,16 @@ class GUIWindow(QWidget):
         options |= QFileDialog.DontUseNativeDialog
         file_name = QFileDialog.getOpenFileName(self, 'Open File', "")
         if file_name:
-            print(file_name)
-        reader = csv.reader(open(file_name[0], "rt"), delimiter=";")
+            print(file_name)"""
+        reader = csv.reader(open(file_name, "rt"), delimiter=";")
         x = list(reader)
+        print("X: ", x)
+        print('END')
         result = numpy.array(x)
-        print(result)
+        filtered_criteria = list(filter(None, result[0]))
+        filtered_alternatives = list(filter(None, result[1]))
+        self.criteria_number = len(filtered_criteria)
+        self.alternative_number = len(filtered_alternatives)
         c = self.criteria_number
         a = self.alternative_number
         l = len(result)
@@ -114,11 +135,12 @@ class GUIWindow(QWidget):
         print("Criteria:", self.criteria)
         self.alternatives = result[1][0:a]
         print("Alternatives:", self.alternatives)
-        self.AHPCalculator = AHPCalculator(self.criteria_number, self.alternative_number, deepcopy(self.criteria), deepcopy(self.alternatives))
+        self.AHPCalculator.initialize_alternatives(self.alternative_number, deepcopy(self.alternatives))
+        if not self.multiple_experts:
+            self.AHPCalculator.initialize_criteria(self.criteria_number, deepcopy(self.criteria))
         matrixes = [[]] * c
         beg = 2
         for i in range(c):
-            #matrixes[i] = result[beg:beg + a].astype("float")
             matrixes[i] = []
             for j in range(a):
                 r = result[beg+j][0:a]
@@ -132,7 +154,10 @@ class GUIWindow(QWidget):
                 matrixes[i].append(r.astype("float"))
             beg = beg + a
             print(matrixes[i])
-            self.AHPCalculator.append_alternative(deepcopy(matrixes[i]))
+            if not self.multiple_experts:
+                self.AHPCalculator.append_alternative(deepcopy(matrixes[i]))
+            else:
+                self.AHPCalculator.append_experts_alternative(deepcopy(matrixes[i]), index)
         c_beg = l - c
         c_end = l
         criteria_comparison = [[]]*c
@@ -144,16 +169,25 @@ class GUIWindow(QWidget):
             criteria_comparison[i] = r.astype("float")
             c_beg+=1
         criteria_comparison = numpy.array(criteria_comparison)
-        self.AHPCalculator.criteria_comparison = deepcopy(criteria_comparison)
+        if not self.multiple_experts:
+            self.AHPCalculator.criteria_comparison = deepcopy(criteria_comparison)
+        else:
+            self.AHPCalculator.append_experts_criteria(deepcopy(criteria_comparison))
         print("Criteria comparison:", criteria_comparison)
 
     def processing(self):
         print("processing")
         total = None
         if(self.choose_method == 1):
-            total = self.AHPCalculator.run_EVM_method()
+            if not self.multiple_experts:
+                total = self.AHPCalculator.run_EVM_method()
+            else:
+                total = self.AHPCalculator.run_multiple_experts_EVM_method()
         elif(self.choose_method == 2):
-            total = self.AHPCalculator.run_GMM_method()
+            if not self.multiple_experts:
+                total = self.AHPCalculator.run_GMM_method()
+            else:
+                total = self.AHPCalculator.run_multiple_experts_GMM_method()
         elif (self.choose_method == 3):
             total = self.AHPCalculator.run_EVM_method()
         elif (self.choose_method == 4):
