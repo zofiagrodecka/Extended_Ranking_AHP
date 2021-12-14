@@ -161,3 +161,11 @@ class AHPCalculator:
         RI = self.ri[n]
         CR = CI/RI
         return CR
+
+    def count_GWI(self, matrix, priority):
+        res = 0
+        n = len(matrix)
+        for i in range(n):
+            for j in range(n):
+                res += abs(matrix[i][j] - priority[i])
+        return res
