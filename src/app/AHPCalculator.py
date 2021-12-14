@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 
 
@@ -16,6 +17,8 @@ class AHPCalculator:
         self.multiple_experts_criteria = []
         self.multiple_experts_alternatives = [[] for _ in range(self.experts_number)]
         self.multiple_experts_results = []
+        self.subcriteria_comparison = []
+        self.subcriteria_priorities = []
 
     def initialize_alternatives(self, alternatives_number, alternatives):
         self.alternatives_names = alternatives
@@ -214,3 +217,59 @@ class AHPCalculator:
         result = np.power(result, 1 / self.experts_number)
         return result
 
+    def calculate_global_priorities(self, subcriteria_numbers):
+        criteria_priorities = copy.deepcopy(self.criteria_priorities)
+        self.criteria_priorities = []
+        i = 0
+        for priority in self.subcriteria_priorities:
+            if priority is not None:
+                self.criteria_priorities.append(np.prod(priority, criteria_priorities[i]))
+                subcriteria_numbers[i] -= 1
+                if subcriteria_numbers[i] == 0:
+                    i += 1
+            else:
+                self.criteria_priorities.append(criteria_priorities[i])
+                i += 1
+
+    def calculate_subcriteria_evm_priorities(self):
+        subcriteria_numbers = []
+        for comparison in self.subcriteria_comparison:
+            if comparison is not None:
+                self.subcriteria_priorities.append(self.calculate_evm_priority(comparison))
+                subcriteria_numbers.append(len(comparison))
+            else:
+                self.subcriteria_priorities.append(None)
+                subcriteria_numbers.append(0)
+        self.calculate_global_priorities(subcriteria_numbers)
+
+    def run_subcriteria_evm_method(self):
+        self.calculate_evm_alternatives_priorities()
+        self.calculate_evm_criteria_priorities()
+        self.calculate_subcriteria_evm_priorities()
+        result = self.synthesize_result()
+        for i in range(self.criteria_number):
+            print(result[i])
+        total = result.sum(axis=0)
+        return total
+
+    def calculate_subcriteria_gmm_priorities(self):
+        subcriteria_numbers = []
+        for comparison in self.subcriteria_comparison:
+            if comparison is not None:
+                self.subcriteria_priorities.append(self.calculate_gmm_priority(comparison))
+                subcriteria_numbers.append(len(comparison))
+            else:
+                self.subcriteria_priorities.append(None)
+                subcriteria_numbers.append(0)
+        # global priorities
+        self.calculate_global_priorities(subcriteria_numbers)
+
+    def run_subcriteria_gmm_method(self):
+        self.calculate_gmm_alternatives_priorities()
+        self.calculate_gmm_criteria_priorities()
+        self.calculate_subcriteria_gmm_priorities()
+        result = self.synthesize_result()
+        for i in range(self.criteria_number):
+            print(result[i])
+        total = result.sum(axis=0)
+        return total
