@@ -15,6 +15,7 @@ class AHPCalculator:
         self.experts_number = experts_number
         self.multiple_experts_criteria = []
         self.multiple_experts_alternatives = [[] for _ in range(self.experts_number)]
+        self.multiple_experts_results = []
 
     def initialize_alternatives(self, alternatives_number, alternatives):
         self.alternatives_names = alternatives
@@ -189,26 +190,27 @@ class AHPCalculator:
                 res += abs(matrix[i][j] - priority[i])
         return res
 
-    def run_multiple_experts_EVM_method(self):  # metoda AIP
-        all_results = []
-        for i in range(self.experts_number):
-            self.criteria_number = len(self.multiple_experts_criteria[i])
-            self.alternative_matrixes = self.multiple_experts_alternatives[i]
-            self.criteria_comparison = self.multiple_experts_criteria[i]
-            all_results.append(self.run_EVM_method())
-        print('ALL RESULTS', all_results)
-        result = np.prod(all_results, axis=0)
+    def run_multiple_experts_EVM_method(self, i):  # metoda AIP
+        self.criteria_number = len(self.multiple_experts_criteria[i])
+        self.alternative_matrixes = self.multiple_experts_alternatives[i]
+        self.criteria_comparison = self.multiple_experts_criteria[i]
+        return self.run_EVM_method()
+
+    def run_multiple_experts_GMM_method(self, i):
+        self.criteria_number = len(self.multiple_experts_criteria[i])
+        self.alternative_matrixes = self.multiple_experts_alternatives[i]
+        self.criteria_comparison = self.multiple_experts_criteria[i]
+        return self.run_GMM_method()
+
+    def run_multiple_experts_incomplete_GMM_method(self, i):
+        self.criteria_number = len(self.multiple_experts_criteria[i])
+        self.alternative_matrixes = self.multiple_experts_alternatives[i]
+        self.criteria_comparison = self.multiple_experts_criteria[i]
+        return self.run_incomplete_GMM_method()
+
+    def synthesize_multiple_experts_result(self):
+        print('ALL RESULTS', self.multiple_experts_results)
+        result = np.prod(self.multiple_experts_results, axis=0)
         result = np.power(result, 1 / self.experts_number)
         return result
 
-    def run_multiple_experts_GMM_method(self):
-        all_results = []
-        for i in range(self.experts_number):
-            self.criteria_number = len(self.multiple_experts_criteria[i])
-            self.alternative_matrixes = self.multiple_experts_alternatives[i]
-            self.criteria_comparison = self.multiple_experts_criteria[i]
-            all_results.append(self.run_GMM_method())
-        print('ALL RESULTS', all_results)
-        result = np.prod(all_results, axis=0)
-        result = np.power(result, 1 / self.experts_number)
-        return result

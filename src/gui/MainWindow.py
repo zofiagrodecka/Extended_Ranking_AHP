@@ -21,6 +21,7 @@ class GUIWindow(QWidget):
         self.alternatives = []
         self.AHPCalculator = None
         self.choose_method = 0
+        self.choose_methods = []
         self.multiple_experts = False
         self.initGUI()
 
@@ -107,6 +108,7 @@ class GUIWindow(QWidget):
         else:
             self.multiple_experts = True
             for i in range(len(files)):
+                self.choose_methods.append(self.choose_method)
                 self.read_file(files[i], i)
 
     def read_file(self, file_name, index):
@@ -148,9 +150,15 @@ class GUIWindow(QWidget):
                     if r[x] == '':
                         r[x] = 0
                         if(self.choose_method == 1):
-                            self.choose_method = 3
+                            if not self.multiple_experts:
+                                self.choose_method = 3
+                            else:
+                                self.choose_methods[index] = 3
                         elif(self.choose_method == 2):
-                            self.choose_method = 4
+                            if not self.multiple_experts:
+                                self.choose_method = 4
+                            else:
+                                self.choose_methods[index] = 4
                 matrixes[i].append(r.astype("float"))
             beg = beg + a
             print(matrixes[i])
@@ -178,21 +186,25 @@ class GUIWindow(QWidget):
     def processing(self):
         print("processing")
         total = None
-        if(self.choose_method == 1):
-            if not self.multiple_experts:
+        if not self.multiple_experts:
+            if (self.choose_method == 1) or (self.choose_method == 3):
                 total = self.AHPCalculator.run_EVM_method()
-            else:
-                total = self.AHPCalculator.run_multiple_experts_EVM_method()
-        elif(self.choose_method == 2):
-            if not self.multiple_experts:
+            elif (self.choose_method == 2):
                 total = self.AHPCalculator.run_GMM_method()
-            else:
-                total = self.AHPCalculator.run_multiple_experts_GMM_method()
-        elif (self.choose_method == 3):
-            total = self.AHPCalculator.run_EVM_method()
-        elif (self.choose_method == 4):
-            total = self.AHPCalculator.run_incomplete_GMM_method()
-        # total = self.AHPCalculator.run_EVM_method()
+            elif (self.choose_method == 4):
+                total = self.AHPCalculator.run_incomplete_GMM_method()
+        else:
+            print("CHOOSE METHODS: ", self.choose_methods)
+            for i in range(len(self.choose_methods)):
+                method = self.choose_methods[i]
+                print(method)
+                if method == 1 or method == 3:
+                    self.AHPCalculator.multiple_experts_results.append(self.AHPCalculator.run_multiple_experts_EVM_method(i))
+                elif method == 2:
+                    self.AHPCalculator.multiple_experts_results.append(self.AHPCalculator.run_multiple_experts_GMM_method(i))
+                elif method == 4:
+                    self.AHPCalculator.multiple_experts_results.append(self.AHPCalculator.run_multiple_experts_incomplete_GMM_method(i))
+            total = self.AHPCalculator.synthesize_multiple_experts_result()
         print("Total:", total)
         best_choice = self.AHPCalculator.alternatives_names[numpy.argmax(total)]
         print("The best choice is:", best_choice)
