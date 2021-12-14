@@ -202,4 +202,13 @@ class AHPCalculator:
         return result
 
     def run_multiple_experts_GMM_method(self):
-        pass
+        all_results = []
+        for i in range(self.experts_number):
+            self.criteria_number = len(self.multiple_experts_criteria[i])
+            self.alternative_matrixes = self.multiple_experts_alternatives[i]
+            self.criteria_comparison = self.multiple_experts_criteria[i]
+            all_results.append(self.run_GMM_method())
+        print('ALL RESULTS', all_results)
+        result = np.prod(all_results, axis=0)
+        result = np.power(result, 1 / self.experts_number)
+        return result
