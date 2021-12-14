@@ -74,6 +74,7 @@ class AHPCalculator:
 
     @staticmethod
     def calculate_gmm_priority(matrix):
+        print(matrix)
         priority = np.prod(matrix, axis=1)
         priority = np.power(priority, 1/len(matrix))
         s = np.sum(priority)
@@ -83,7 +84,7 @@ class AHPCalculator:
 
     def calculate_gmm_criteria_priorities(self):
         self.criteria_priorities = self.calculate_gmm_priority(self.criteria_comparison)
-        print(self.criteria_comparison)
+        print('criteria priorities' , self.criteria_priorities)
 
     def calculate_gmm_alternatives_priorities(self):
         for matrix in self.alternative_matrixes:
@@ -219,17 +220,21 @@ class AHPCalculator:
 
     def calculate_global_priorities(self, subcriteria_numbers):
         criteria_priorities = copy.deepcopy(self.criteria_priorities)
-        self.criteria_priorities = []
+        res = []
         i = 0
+        print('sub priorities', self.subcriteria_priorities)
         for priority in self.subcriteria_priorities:
             if priority is not None:
-                self.criteria_priorities.append(np.prod(priority, criteria_priorities[i]))
-                subcriteria_numbers[i] -= 1
-                if subcriteria_numbers[i] == 0:
-                    i += 1
+                print('list', [priority, criteria_priorities[i]])
+                res.append(priority*criteria_priorities[i])
+                print(self.criteria_priorities)
             else:
-                self.criteria_priorities.append(criteria_priorities[i])
-                i += 1
+                res.append(np.array([criteria_priorities[i]]))
+            i += 1
+        self.criteria_priorities = []
+        for array in res:
+            for element in array:
+                self.criteria_priorities.append(element)
 
     def calculate_subcriteria_evm_priorities(self):
         subcriteria_numbers = []
@@ -261,8 +266,8 @@ class AHPCalculator:
             else:
                 self.subcriteria_priorities.append(None)
                 subcriteria_numbers.append(0)
-        # global priorities
         self.calculate_global_priorities(subcriteria_numbers)
+        print('Res priority:', self.criteria_priorities)
 
     def run_subcriteria_gmm_method(self):
         self.calculate_gmm_alternatives_priorities()
