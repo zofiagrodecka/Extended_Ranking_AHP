@@ -11,6 +11,7 @@ class AHPCalculator:
         self.criteria_comparison = None
         self.criteria_priorities = []
         self.alternatives_priorities = []
+        self.ri = [0, 0, 0, 0.52, 0.89, 1.11, 1.25, 1.35, 1.40, 1.45, 1.49, 1.51, 1.54, 1.56, 1.57, 1.58]
 
     def append_alternative(self, matrix):
         self.alternative_matrixes.append(np.array(matrix))
@@ -117,7 +118,7 @@ class AHPCalculator:
                 for x in range(l):
                     if matrix[i][x] == 0:
                         s = s +1
-                print(s)
+                #print(s)
                 lnc = 0
                 for j in range(l):
                     if matrix[i][j] == 0 and i != j:
@@ -128,10 +129,10 @@ class AHPCalculator:
                     elif i == j:
                         G[i][j] = l - s
                 r[i] = lnc
-            print(G)
-            print(r)
+            #print(G)
+            #print(r)
             W = np.linalg.inv(G).dot(r)
-            print(W)
+            #print(W)
             w = np.zeros(len(W))
             sum_w = 0
             for e in range(len(W)):
@@ -139,7 +140,7 @@ class AHPCalculator:
                 sum_w = sum_w + w[e]
             for e in range(len(w)):
                 w[e] = w[e]/sum_w
-            print(w)
+            #print(w)
             self.alternatives_priorities.append(w)
         print(self.alternatives_priorities)
     def run_incomplete_GMM_method(self):
@@ -150,3 +151,13 @@ class AHPCalculator:
             print(result[i])
         total = result.sum(axis=0)
         return total
+
+    def count_CR(self, matrix):
+        n = len(matrix)
+        eigvals, eigvecs = np.linalg.eig(matrix)
+        eigvals = eigvals.real
+        max_eig = np.max(eigvals)
+        CI = (max_eig - n)/n-1
+        RI = self.ri[n]
+        CR = CI/RI
+        return CR
