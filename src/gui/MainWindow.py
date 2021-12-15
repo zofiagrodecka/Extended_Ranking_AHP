@@ -213,9 +213,13 @@ class GUIWindow(QWidget):
         criteria_comparison = [[]]*c
         for i in range(c):
             r =  result[beg][0:c]
+            em_nr = 0
             for x in range(len(r)):
                 if r[x] == '':
                     r[x] = 0
+                    em_r = em_r + 1
+            if (self.choose_method == 1 or self.choose_method == 3):
+                r[i] = em_nr + 1
             criteria_comparison[i] = r.astype("float")
             beg+=1
         criteria_comparison = numpy.array(criteria_comparison)
