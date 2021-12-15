@@ -240,12 +240,13 @@ class AHPCalculator:
         subcriteria_numbers = []
         for comparison in self.subcriteria_comparison:
             if comparison is not None:
-                self.subcriteria_priorities.append(self.calculate_evm_priority(comparison))
+                self.subcriteria_priorities.append(self.calculate_evm_priority(np.array(comparison)))
                 subcriteria_numbers.append(len(comparison))
             else:
                 self.subcriteria_priorities.append(None)
                 subcriteria_numbers.append(0)
         self.calculate_global_priorities(subcriteria_numbers)
+        print('Res priority:', self.criteria_priorities)
 
     def run_subcriteria_evm_method(self):
         self.calculate_evm_alternatives_priorities()
