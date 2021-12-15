@@ -19,6 +19,8 @@ class GUIWindow(QWidget):
         self.alternative_number = 0
         self.criteria = []
         self.alternatives = []
+        self.subcriteria = []
+        self.all_criteria = []
         self.AHPCalculator = None
         self.choose_method = 0
         self.choose_methods = []
@@ -49,34 +51,34 @@ class GUIWindow(QWidget):
         self.method_layout.addWidget(self.choose1)
         self.method_layout.addWidget(self.choose2)
         self.method.setLayout(self.method_layout)
-        self.subtitle = QLabel(self)
-        self.subtitle.setText("Wprowadź parametry:")
-        self.subtitle.setStyleSheet("color:black; font-size:15px;text-transform:uppercase; text-align:center;")
-        self.subtitle.setGeometry(0, 50, 500, 50)
-        self.subtitle.setAlignment(Qt.AlignCenter)
+        # self.subtitle = QLabel(self)
+        # self.subtitle.setText("Wprowadź parametry:")
+        # self.subtitle.setStyleSheet("color:black; font-size:15px;text-transform:uppercase; text-align:center;")
+        # self.subtitle.setGeometry(0, 50, 500, 50)
+        # self.subtitle.setAlignment(Qt.AlignCenter)
         self.layout = QVBoxLayout()
         self.layout.setAlignment(Qt.AlignTop)
-        self.param = QWidget(self)
-        self.param.setGeometry(0, 100, 500, 150)
-        self.param_layout = QGridLayout()
-        self.param_layout.setColumnStretch(0, 0)
-        self.param_title_1 = QLabel()
-        self.param_title_1.setText("Liczba kryteriów:")
-        self.param_title_1.setGeometry(10, 0, 200, 50)
-        # self.param_title_1.setAlignment(Qt.AlignCenter)
-        self.param_title_2 = QLabel(self.param)
-        self.param_title_2.setText("Liczba alternatyw:")
-        self.param_title_2.setGeometry(10, 20, 200, 50)
-        # self.param_title_2.setAlignment(Qt.AlignCenter)
-        self.param_edit_1 = QLineEdit(self.param)
-        self.param_edit_1.setGeometry(0, 0, 100, 50)
-        self.param_edit_2 = QLineEdit(self.param)
-        self.param_edit_2.setGeometry(0, 0, 100, 50)
-        self.param_layout.addWidget(self.param_title_1, 0, 0)
-        self.param_layout.addWidget(self.param_edit_1, 0, 1)
-        self.param_layout.addWidget(self.param_title_2, 1, 0)
-        self.param_layout.addWidget(self.param_edit_2, 1, 1)
-        self.param.setLayout(self.param_layout)
+        # self.param = QWidget(self)
+        # self.param.setGeometry(0, 100, 500, 150)
+        # self.param_layout = QGridLayout()
+        # self.param_layout.setColumnStretch(0, 0)
+        # self.param_title_1 = QLabel()
+        # self.param_title_1.setText("Liczba kryteriów:")
+        # self.param_title_1.setGeometry(10, 0, 200, 50)
+        # # self.param_title_1.setAlignment(Qt.AlignCenter)
+        # self.param_title_2 = QLabel(self.param)
+        # self.param_title_2.setText("Liczba alternatyw:")
+        # self.param_title_2.setGeometry(10, 20, 200, 50)
+        # # self.param_title_2.setAlignment(Qt.AlignCenter)
+        # self.param_edit_1 = QLineEdit(self.param)
+        # self.param_edit_1.setGeometry(0, 0, 100, 50)
+        # self.param_edit_2 = QLineEdit(self.param)
+        # self.param_edit_2.setGeometry(0, 0, 100, 50)
+        # self.param_layout.addWidget(self.param_title_1, 0, 0)
+        # self.param_layout.addWidget(self.param_edit_1, 0, 1)
+        # self.param_layout.addWidget(self.param_title_2, 1, 0)
+        # self.param_layout.addWidget(self.param_edit_2, 1, 1)
+        # self.param.setLayout(self.param_layout)
         self.load = QPushButton("Załaduj plik z danymi", self)
         self.load.setStyleSheet("background:#3f3f3f; color:#d1d1d1; text-transform:uppercase;")
         self.load.setGeometry(170, 250, 150, 30)
@@ -88,8 +90,8 @@ class GUIWindow(QWidget):
         self.layout.addWidget(self.title)
         self.layout.addWidget(self.subtitle_p)
         self.layout.addWidget(self.method)
-        self.layout.addWidget(self.subtitle)
-        self.layout.addWidget(self.param)
+        #self.layout.addWidget(self.subtitle)
+        #self.layout.addWidget(self.param)
         self.layout.addWidget(self.load)
         self.layout.addWidget(self.forward)
         self.setLayout(self.layout)
@@ -127,22 +129,40 @@ class GUIWindow(QWidget):
         print('END')
         result = numpy.array(x)
         filtered_criteria = list(filter(None, result[0]))
-        filtered_alternatives = list(filter(None, result[1]))
         self.criteria_number = len(filtered_criteria)
-        self.alternative_number = len(filtered_alternatives)
         c = self.criteria_number
-        a = self.alternative_number
-        l = len(result)
         self.criteria = result[0][0:c]
         print("Criteria:", self.criteria)
-        self.alternatives = result[1][0:a]
+        subcriteria_number = 0
+        for i in range(1,c+1):
+            row = list(filter(None, result[i]))
+            if(len(row) == 0):
+                row = None
+                subcriteria_number = subcriteria_number + 1
+                self.all_criteria.append(self.criteria[i-1])
+            else:
+                subcriteria_number = subcriteria_number + len(row)
+                for j in range(len(row)):
+                    self.all_criteria.append(row[j])
+            self.subcriteria.append(row)
+        print("Subriteria:", self.subcriteria)
+        print("All criteria", self.all_criteria)
+        filtered_alternatives = list(filter(None, result[c+1]))
+        #self.criteria_number = len(filtered_criteria)
+        self.alternative_number = len(filtered_alternatives)
+        #c = self.criteria_number
+        a = self.alternative_number
+        l = len(result)
+        #self.criteria = result[0][0:c]
+        #print("Criteria:", self.criteria)
+        self.alternatives = result[c+1][0:a]
         print("Alternatives:", self.alternatives)
-        self.AHPCalculator.initialize_alternatives(self.alternative_number, deepcopy(self.alternatives))
-        if not self.multiple_experts:
-            self.AHPCalculator.initialize_criteria(self.criteria_number, deepcopy(self.criteria))
-        matrixes = [[]] * c
-        beg = 2
-        for i in range(c):
+        # self.AHPCalculator.initialize_alternatives(self.alternative_number, deepcopy(self.alternatives))
+        # if not self.multiple_experts:
+        #     self.AHPCalculator.initialize_criteria(self.criteria_number, deepcopy(self.criteria))
+        matrixes = [[]] * subcriteria_number
+        beg = c+2
+        for i in range(subcriteria_number):
             matrixes[i] = []
             for j in range(a):
                 r = result[beg+j][0:a]
@@ -161,27 +181,50 @@ class GUIWindow(QWidget):
                                 self.choose_methods[index] = 4
                 matrixes[i].append(r.astype("float"))
             beg = beg + a
+            matrixes[i] = numpy.matrix(matrixes[i])
+            print("Comparison matrix - criterium ", self.all_criteria[i])
             print(matrixes[i])
-            if not self.multiple_experts:
-                self.AHPCalculator.append_alternative(deepcopy(matrixes[i]))
-            else:
-                self.AHPCalculator.append_experts_alternative(deepcopy(matrixes[i]), index)
-        c_beg = l - c
-        c_end = l
+        #     if not self.multiple_experts:
+        #         self.AHPCalculator.append_alternative(deepcopy(matrixes[i]))
+        #     else:
+        #         self.AHPCalculator.append_experts_alternative(deepcopy(matrixes[i]), index)
+        c_beg = beg
+        c_end = beg + c
         criteria_comparison = [[]]*c
         for i in range(c):
-            r =  result[c_beg][0:c]
+            r =  result[beg][0:c]
             for x in range(len(r)):
                 if r[x] == '':
                     r[x] = 0
             criteria_comparison[i] = r.astype("float")
-            c_beg+=1
+            beg+=1
         criteria_comparison = numpy.array(criteria_comparison)
-        if not self.multiple_experts:
-            self.AHPCalculator.criteria_comparison = deepcopy(criteria_comparison)
-        else:
-            self.AHPCalculator.append_experts_criteria(deepcopy(criteria_comparison))
-        print("Criteria comparison:", criteria_comparison)
+        print("Criteria comarison matrix - main")
+        print(criteria_comparison)
+        subcriteria_comparison = [[]]*c
+        for i in range(c):
+            sub_nr = 0
+            subcriteria_comparison[i] = []
+            if(self.subcriteria[i] != None):
+                print(self.subcriteria[i])
+                sub_nr = len(self.subcriteria[i])
+                for j in range(sub_nr):
+                    r = result[beg][0:sub_nr]
+                    for x in range(len(r)):
+                        if r[x] == '':
+                            r[x] = 0
+                    subcriteria_comparison[i].append(r.astype("float"))
+                    beg = beg + 1
+            else:
+                subcriteria_comparison[i].append(None)
+            subcriteria_comparison[i] = numpy.matrix(subcriteria_comparison[i])
+            print("Subcriteria comparison - criteria: ", self.criteria[i])
+            print(subcriteria_comparison[i])
+        # if not self.multiple_experts:
+        #     self.AHPCalculator.criteria_comparison = deepcopy(criteria_comparison)
+        # else:
+        #     self.AHPCalculator.append_experts_criteria(deepcopy(criteria_comparison))
+        # print("Criteria comparison:", criteria_comparison)
 
     def processing(self):
         print("processing")
