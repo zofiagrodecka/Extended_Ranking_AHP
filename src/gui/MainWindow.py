@@ -171,9 +171,11 @@ class GUIWindow(QWidget):
             matrixes[i] = []
             for j in range(a):
                 r = result[beg+j][0:a]
+                empty_nr = 0
                 for x in range(len(r)):
                     if r[x] == '':
                         r[x] = 0
+                        empty_nr = empty_nr+1
                         if (self.choose_method == 1):
                             if not self.multiple_experts:
                                 self.choose_method = 3
@@ -184,6 +186,8 @@ class GUIWindow(QWidget):
                                 self.choose_method = 4
                             else:
                                 self.choose_methods[index] = 4
+                if(self.choose_method == 1 or self.choose_method == 3):
+                    r[j] = empty_nr+1
                 matrixes[i].append(r.astype("float"))
             beg = beg + a
             matrixes[i] = numpy.matrix(matrixes[i])
