@@ -16,6 +16,7 @@ class AHPCalculator:
         self.experts_number = experts_number
         self.multiple_experts_criteria = []
         self.multiple_experts_alternatives = [[] for _ in range(self.experts_number)]
+        self.multiple_experts_subcriteria = []
         self.multiple_experts_results = []
         self.subcriteria_comparison = []
         self.subcriteria_priorities = []
@@ -39,6 +40,11 @@ class AHPCalculator:
     def append_experts_criteria(self, matrix):
         self.multiple_experts_criteria.append(np.array(matrix))
 
+    def append_experts_subcriteria(self, matrix):
+        print('SUBCRIT')
+        self.multiple_experts_subcriteria.append(matrix)
+        print(self.multiple_experts_subcriteria)
+
     @staticmethod
     def calculate_evm_priority(matrix):
         matrix /= matrix.sum(axis=0)
@@ -59,8 +65,11 @@ class AHPCalculator:
     def synthesize_result(self):
         result = np.array([[None] * self.alternatives_number for _ in range(self.criteria_number)])
         for i in range(self.criteria_number):
+            print('i:', i)
             for j in range(self.alternatives_number):
+                print('j', j)
                 result[i][j] = self.alternatives_priorities[i][j] * self.criteria_priorities[i]
+        print('Syntesis result:', result)
         return result
 
     def run_EVM_method(self):
@@ -212,13 +221,37 @@ class AHPCalculator:
         self.criteria_comparison = self.multiple_experts_criteria[i]
         return self.run_incomplete_GMM_method()
 
+    def run_multiple_experts_subcriteria_EVM_method(self, i):
+        self.alternative_matrixes = self.multiple_experts_alternatives[i]
+        self.criteria_comparison = self.multiple_experts_criteria[i]
+        self.subcriteria_comparison = self.multiple_experts_subcriteria[i]
+        self.criteria_number = 0
+        for list in self.subcriteria_comparison:
+            if list is not None:
+                self.criteria_number += len(list)
+            else:
+                self.criteria_number += 1
+        return self.run_subcriteria_evm_method()
+
+    def run_multiple_experts_subcriteria_GMM_method(self, i):
+        self.alternative_matrixes = self.multiple_experts_alternatives[i]
+        self.criteria_comparison = self.multiple_experts_criteria[i]
+        self.subcriteria_comparison = self.multiple_experts_subcriteria[i]
+        self.criteria_number = 0
+        for list in self.subcriteria_comparison:
+            if list is not None:
+                self.criteria_number += len(list)
+            else:
+                self.criteria_number += 1
+        return self.run_subcriteria_gmm_method()
+
     def synthesize_multiple_experts_result(self):
         print('ALL RESULTS', self.multiple_experts_results)
         result = np.prod(self.multiple_experts_results, axis=0)
         result = np.power(result, 1 / self.experts_number)
         return result
 
-    def calculate_global_priorities(self, subcriteria_numbers):
+    def calculate_global_priorities(self):
         criteria_priorities = copy.deepcopy(self.criteria_priorities)
         res = []
         i = 0
@@ -235,6 +268,7 @@ class AHPCalculator:
         for array in res:
             for element in array:
                 self.criteria_priorities.append(element)
+        print('Crit prioritie:', self.criteria_priorities)
 
     def calculate_subcriteria_evm_priorities(self):
         subcriteria_numbers = []
@@ -245,7 +279,7 @@ class AHPCalculator:
             else:
                 self.subcriteria_priorities.append(None)
                 subcriteria_numbers.append(0)
-        self.calculate_global_priorities(subcriteria_numbers)
+        self.calculate_global_priorities()
         print('Res priority:', self.criteria_priorities)
 
     def run_subcriteria_evm_method(self):
@@ -267,7 +301,7 @@ class AHPCalculator:
             else:
                 self.subcriteria_priorities.append(None)
                 subcriteria_numbers.append(0)
-        self.calculate_global_priorities(subcriteria_numbers)
+        self.calculate_global_priorities()
         print('Res priority:', self.criteria_priorities)
 
     def run_subcriteria_gmm_method(self):

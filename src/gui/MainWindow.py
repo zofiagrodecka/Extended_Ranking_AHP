@@ -134,6 +134,7 @@ class GUIWindow(QWidget):
         self.criteria = result[0][0:c]
         print("Criteria:", self.criteria)
         subcriteria_number = 0
+        self.have_subcriteria = False
         for i in range(1,c+1):
             row = list(filter(None, result[i]))
             if(len(row) == 0):
@@ -163,7 +164,7 @@ class GUIWindow(QWidget):
             if self.have_subcriteria:
                 self.AHPCalculator.initialize_criteria(len(self.all_criteria), deepcopy(self.all_criteria))
             else:
-                self.AHPCalculator.initialize_criteria(self.criteria_number, deepcopy(self.criteria))
+                self.AHPCalculator.initialize_criteria(len(self.all_criteria), deepcopy(self.all_criteria))
         matrixes = [[]] * subcriteria_number
         beg = c+2
         for i in range(subcriteria_number):
@@ -172,7 +173,6 @@ class GUIWindow(QWidget):
                 r = result[beg+j][0:a]
                 for x in range(len(r)):
                     if r[x] == '':
-                        print('Have sub:', self.have_subcriteria)
                         r[x] = 0
                         if (self.choose_method == 1):
                             if not self.multiple_experts:
@@ -231,10 +231,6 @@ class GUIWindow(QWidget):
                                 r[x] = 0
                         subcriteria_comparison[i].append(r.astype("float"))
                         beg = beg + 1
-                else:
-                    pass
-                    # subcriteria_comparison[i].append(None)
-                    # subcriteria_comparison[i] = None
                 #subcriteria_comparison[i] = numpy.matrix(subcriteria_comparison[i])
                 print("Subcriteria comparison - criteria: ", self.criteria[i])
                 print(subcriteria_comparison[i])
@@ -246,7 +242,7 @@ class GUIWindow(QWidget):
             if not self.multiple_experts:
                 self.AHPCalculator.subcriteria_comparison = deepcopy(subcriteria_comparison)
             else:
-                pass  # TODO
+                self.AHPCalculator.append_experts_subcriteria(deepcopy(subcriteria_comparison))
         print("Criteria comparison:", criteria_comparison)
 
     def processing(self):
@@ -264,7 +260,7 @@ class GUIWindow(QWidget):
                 total = self.AHPCalculator.run_subcriteria_evm_method()
             elif self.choose_method == 6:
                 total = self.AHPCalculator.run_subcriteria_gmm_method()
-        else:  # TODO
+        else:
             print("CHOOSE METHODS: ", self.choose_methods)
             for i in range(len(self.choose_methods)):
                 method = self.choose_methods[i]
@@ -275,6 +271,10 @@ class GUIWindow(QWidget):
                     self.AHPCalculator.multiple_experts_results.append(self.AHPCalculator.run_multiple_experts_GMM_method(i))
                 elif method == 4:
                     self.AHPCalculator.multiple_experts_results.append(self.AHPCalculator.run_multiple_experts_incomplete_GMM_method(i))
+                elif method == 5:
+                    self.AHPCalculator.multiple_experts_results.append(self.AHPCalculator.run_multiple_experts_subcriteria_EVM_method(i))
+                elif method == 6:
+                    self.AHPCalculator.multiple_experts_results.append(self.AHPCalculator.run_multiple_experts_subcriteria_GMM_method(i))
             total = self.AHPCalculator.synthesize_multiple_experts_result()
         print("Total:", total)
         best_choice = self.AHPCalculator.alternatives_names[numpy.argmax(total)]
