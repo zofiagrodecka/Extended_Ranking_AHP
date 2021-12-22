@@ -18,7 +18,7 @@ class AHPCalculator:
         self.multiple_experts_alternatives = [[] for _ in range(self.experts_number)]
         self.multiple_experts_subcriteria = []
         self.multiple_experts_results = []
-        self.subcriteria_comparison = []
+        self.subcriteria_comparison = None
         self.subcriteria_priorities = []
 
     def initialize_alternatives(self, alternatives_number, alternatives):
@@ -34,16 +34,12 @@ class AHPCalculator:
 
     def append_experts_alternative(self, matrix, index):
         self.multiple_experts_alternatives[index].append(np.array(matrix))
-        print("EXPERTS")
-        print(self.multiple_experts_alternatives)
 
     def append_experts_criteria(self, matrix):
         self.multiple_experts_criteria.append(np.array(matrix))
 
     def append_experts_subcriteria(self, matrix):
-        print('SUBCRIT')
         self.multiple_experts_subcriteria.append(matrix)
-        print(self.multiple_experts_subcriteria)
 
     @staticmethod
     def calculate_evm_priority(matrix):
@@ -65,9 +61,7 @@ class AHPCalculator:
     def synthesize_result(self):
         result = np.array([[None] * self.alternatives_number for _ in range(self.criteria_number)])
         for i in range(self.criteria_number):
-            print('i:', i)
             for j in range(self.alternatives_number):
-                print('j', j)
                 result[i][j] = self.alternatives_priorities[i][j] * self.criteria_priorities[i]
         print('Syntesis result:', result)
         return result
@@ -138,6 +132,7 @@ class AHPCalculator:
         for e in range(len(w)):
             w[e] = w[e] / sum_w
         self.criteria_priorities = w
+
     def calculate_inc_gmm_alternatives_priorities(self):
         for matrix in self.alternative_matrixes:
             l = len(matrix)
@@ -176,6 +171,7 @@ class AHPCalculator:
             #print(w)
             self.alternatives_priorities.append(w)
         print(self.alternatives_priorities)
+
     def run_incomplete_GMM_method(self):
         self.calculate_inc_gmm_alternatives_priorities()
         self.calculate_inc_gmm_criteria_priorities()
@@ -224,7 +220,8 @@ class AHPCalculator:
     def run_multiple_experts_subcriteria_EVM_method(self, i):
         self.alternative_matrixes = self.multiple_experts_alternatives[i]
         self.criteria_comparison = self.multiple_experts_criteria[i]
-        self.subcriteria_comparison = self.multiple_experts_subcriteria[i]
+        if self.multiple_experts_subcriteria[i] is not None:
+            self.subcriteria_comparison = self.multiple_experts_subcriteria[i]
         self.criteria_number = 0
         for list in self.subcriteria_comparison:
             if list is not None:
@@ -255,12 +252,9 @@ class AHPCalculator:
         criteria_priorities = copy.deepcopy(self.criteria_priorities)
         res = []
         i = 0
-        print('sub priorities', self.subcriteria_priorities)
         for priority in self.subcriteria_priorities:
             if priority is not None:
-                print('list', [priority, criteria_priorities[i]])
                 res.append(priority*criteria_priorities[i])
-                print(self.criteria_priorities)
             else:
                 res.append(np.array([criteria_priorities[i]]))
             i += 1
@@ -268,7 +262,6 @@ class AHPCalculator:
         for array in res:
             for element in array:
                 self.criteria_priorities.append(element)
-        print('Crit prioritie:', self.criteria_priorities)
 
     def calculate_subcriteria_evm_priorities(self):
         subcriteria_numbers = []

@@ -124,9 +124,12 @@ class GUIWindow(QWidget):
         file_name = QFileDialog.getOpenFileName(self, 'Open File', "")
         if file_name:
             print(file_name)"""
+        self.criteria = []
+        self.alternatives = []
+        self.subcriteria = []
+        self.all_criteria = []
         reader = csv.reader(open(file_name, "rt"), delimiter=";")
         x = list(reader)
-        print("X: ", x)
         result = numpy.array(x)
         filtered_criteria = list(filter(None, result[0]))
         self.criteria_number = len(filtered_criteria)
@@ -135,7 +138,7 @@ class GUIWindow(QWidget):
         print("Criteria:", self.criteria)
         subcriteria_number = 0
         self.have_subcriteria = False
-        for i in range(1,c+1):
+        for i in range(1, c+1):
             row = list(filter(None, result[i]))
             if(len(row) == 0):
                 row = None
@@ -217,7 +220,7 @@ class GUIWindow(QWidget):
             for x in range(len(r)):
                 if r[x] == '':
                     r[x] = 0
-                    em_r = em_r + 1
+                    em_nr = em_nr + 1  # TU BYLA LITEROWKA? bylo em_r
             if (self.choose_method == 1 or self.choose_method == 3):
                 r[i] = em_nr + 1
             criteria_comparison[i] = r.astype("float")
@@ -225,7 +228,7 @@ class GUIWindow(QWidget):
         criteria_comparison = numpy.array(criteria_comparison)
         print("Criteria comarison matrix - main")
         print(criteria_comparison)
-        if(self.have_subcriteria):
+        if self.have_subcriteria:
             subcriteria_comparison = [None for _ in range(c)]
             for i in range(c):
                 sub_nr = 0
@@ -239,25 +242,27 @@ class GUIWindow(QWidget):
                                 r[x] = 0
                         subcriteria_comparison[i].append(r.astype("float"))
                         beg = beg + 1
-                #subcriteria_comparison[i] = numpy.matrix(subcriteria_comparison[i])
                 print("Subcriteria comparison - criteria: ", self.criteria[i])
                 print(subcriteria_comparison[i])
+            if not self.multiple_experts:
+                self.AHPCalculator.subcriteria_comparison = deepcopy(subcriteria_comparison)
+            else:
+                print('subcriteria comparison', subcriteria_comparison)
+                self.AHPCalculator.append_experts_subcriteria(deepcopy(subcriteria_comparison))
+        else:
+            self.AHPCalculator.append_experts_subcriteria(deepcopy(self.subcriteria))
+
         if not self.multiple_experts:
             self.AHPCalculator.criteria_comparison = deepcopy(criteria_comparison)
         else:
             self.AHPCalculator.append_experts_criteria(deepcopy(criteria_comparison))
-        if self.have_subcriteria:
-            if not self.multiple_experts:
-                self.AHPCalculator.subcriteria_comparison = deepcopy(subcriteria_comparison)
-            else:
-                self.AHPCalculator.append_experts_subcriteria(deepcopy(subcriteria_comparison))
+
         print("Criteria comparison:", criteria_comparison)
 
     def processing(self):
         print("processing")
         total = None
         if not self.multiple_experts:
-            print('METOD:', self.choose_method)
             if (self.choose_method == 1) or (self.choose_method == 3):
                 total = self.AHPCalculator.run_EVM_method()
             elif (self.choose_method == 2):
@@ -269,10 +274,8 @@ class GUIWindow(QWidget):
             elif self.choose_method == 6:
                 total = self.AHPCalculator.run_subcriteria_gmm_method()
         else:
-            print("CHOOSE METHODS: ", self.choose_methods)
             for i in range(len(self.choose_methods)):
                 method = self.choose_methods[i]
-                print(method)
                 if method == 1 or method == 3:
                     self.AHPCalculator.multiple_experts_results.append(self.AHPCalculator.run_multiple_experts_EVM_method(i))
                 elif method == 2:
