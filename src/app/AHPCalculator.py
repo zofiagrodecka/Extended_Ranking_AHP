@@ -223,6 +223,7 @@ class AHPCalculator:
         return np.abs(CR)
 
     def count_GWI(self, matrix, priority):
+        matrix /= matrix.sum(axis=0)
         print(matrix)
         print(priority)
         res = 0
@@ -230,7 +231,7 @@ class AHPCalculator:
         print(n)
         for i in range(n):
             for j in range(n):
-                res += abs(matrix[i,j] - priority[i])
+                res += abs(matrix[i,j] - priority[i]) * 1/len(matrix)
         return res
 
     def run_multiple_experts_EVM_method(self, i):  # metoda AIP
