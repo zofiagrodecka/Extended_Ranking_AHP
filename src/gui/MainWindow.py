@@ -28,6 +28,7 @@ class GUIWindow(QWidget):
         self.have_subcriteria = False
         self.matrixes_CR = []
         self.matrixes_GWI = []
+        self.matrixes_all_criteria = []
         self.initGUI()
 
     def initGUI(self):
@@ -117,6 +118,7 @@ class GUIWindow(QWidget):
             self.subcriteria.append(row)
         print("Subriteria:", self.subcriteria)
         print("All criteria", self.all_criteria)
+        self.matrixes_all_criteria.append(self.all_criteria)
         filtered_alternatives = list(filter(None, result[c+1]))
         self.alternative_number = len(filtered_alternatives)
         a = self.alternative_number
@@ -279,6 +281,8 @@ class GUIWindow(QWidget):
         print(self.matrixes_CR)
         print("wartości GWI")
         print(self.matrixes_GWI)
+        print("all all criteria")
+        print(self.matrixes_all_criteria)
 
         # Plot
         ax_x = []
@@ -295,7 +299,7 @@ class GUIWindow(QWidget):
         self.plot.set_title('Ranking AHP domów w okolicy Krakowa')
         #self.plot.show()
 
-        self.setGeometry(200, 200, 800, 500)
+        self.setGeometry(200, 50, 800, 900)
         self.layout.itemAt(2).widget().deleteLater()
         self.layout.itemAt(3).widget().deleteLater()
         self.layout.itemAt(4).widget().deleteLater()
@@ -334,6 +338,27 @@ class GUIWindow(QWidget):
         self.b_layout.addWidget(self.canvas)
         self.bottom.setLayout(self.b_layout)
         self.layout.addWidget(self.bottom)
+
+        experts_string = []
+
+        for y in range(len(self.matrixes_all_criteria)):
+            criteria_names = self.matrixes_all_criteria[y]
+            criteria_CR = self.matrixes_CR[y]
+            criteria_GWI = self.matrixes_GWI[y]
+            string = "Ekspert " + str(y+1) + ".: "
+            for cn in range(len(criteria_names)):
+                string = string + criteria_names[cn] + ": CR [" + str(criteria_CR[cn]) + "] GWI [" + str(criteria_GWI[cn]) + "] "
+            print(string)
+            experts_string.append(string)
+
+        print(experts_string)
+
+        for s in experts_string:
+            label = QLabel()
+            label.setText(s)
+            label.setFixedSize(800,100)
+            label.setWordWrap(True)
+            self.layout.addWidget(label)
 
     def state(self, b):
         if b.text() == "EVM":
