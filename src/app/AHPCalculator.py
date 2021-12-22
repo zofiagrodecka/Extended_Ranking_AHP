@@ -135,6 +135,35 @@ class AHPCalculator:
             w[e] = w[e] / sum_w
         self.criteria_priorities = w
 
+    def calculate_inc_gmm_alt_priority(self, matrix):
+        l = len(matrix)
+        G = np.zeros((l, l))
+        r = np.zeros(l)
+        for i in range(l):
+            s = 0
+            for x in range(l):
+                if matrix[i,x] == 0:
+                    s = s + 1
+            lnc = 0
+            for j in range(l):
+                if matrix[i,j] == 0 and i != j:
+                    G[i][j] = 1
+                elif matrix[i,j] != 0 and i != j:
+                    G[i][j] = 0
+                    lnc = lnc + np.log(matrix[i,j])
+                elif i == j:
+                    G[i][j] = l - s
+            r[i] = lnc
+        W = np.linalg.inv(G).dot(r)
+        w = np.zeros(len(W))
+        sum_w = 0
+        for e in range(len(W)):
+            w[e] = np.exp(W[e])
+            sum_w = sum_w + w[e]
+        for e in range(len(w)):
+            w[e] = w[e] / sum_w
+        return w
+
     def calculate_inc_gmm_alternatives_priorities(self):
         for matrix in self.alternative_matrixes:
             l = len(matrix)
@@ -194,11 +223,14 @@ class AHPCalculator:
         return np.abs(CR)
 
     def count_GWI(self, matrix, priority):
+        print(matrix)
+        print(priority)
         res = 0
         n = len(matrix)
+        print(n)
         for i in range(n):
             for j in range(n):
-                res += abs(matrix[i][j] - priority[i])
+                res += abs(matrix[i,j] - priority[i])
         return res
 
     def run_multiple_experts_EVM_method(self, i):  # metoda AIP

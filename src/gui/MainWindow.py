@@ -27,6 +27,7 @@ class GUIWindow(QWidget):
         self.multiple_experts = False
         self.have_subcriteria = False
         self.matrixes_CR = []
+        self.matrixes_GWI = []
         self.initGUI()
 
     def initGUI(self):
@@ -130,6 +131,7 @@ class GUIWindow(QWidget):
                 self.AHPCalculator.initialize_criteria(len(self.all_criteria), deepcopy(self.all_criteria))
         matrixes = [[]] * subcriteria_number
         self.matrixes_CR.append([])
+        self.matrixes_GWI.append([])
         beg = c+2
         for i in range(subcriteria_number):
             matrixes[i] = []
@@ -157,11 +159,32 @@ class GUIWindow(QWidget):
             matrixes[i] = numpy.matrix(matrixes[i])
             print("Comparison matrix - criterium ", self.all_criteria[i])
             print(matrixes[i])
+            matrix = deepcopy(matrixes[i])
+            matrix2 = deepcopy(matrixes[i])
             if not self.multiple_experts:
                 self.AHPCalculator.append_alternative(deepcopy(matrixes[i]))
             else:
                 self.AHPCalculator.append_experts_alternative(deepcopy(matrixes[i]), index)
             self.matrixes_CR[index].append(self.AHPCalculator.count_CR(matrixes[i]))
+            priority_gwi = -1
+            gwi = -1
+            if(self.choose_method == 1 or self.choose_method == 3):
+                priority_gwi = self.AHPCalculator.calculate_evm_priority(matrix)
+                print(priority_gwi)
+                priority_gwi = numpy.array(priority_gwi)
+                # print(matrixes[i])
+                priority = []
+                for x in priority_gwi:
+                    print(x[0])
+                    priority.append(x[0])
+                print(priority)
+                gwi = self.AHPCalculator.count_GWI(matrix2, priority)
+            else:
+                priority = self.AHPCalculator.calculate_inc_gmm_alt_priority(matrix)
+                print(priority)
+                gwi = self.AHPCalculator.count_GWI(matrix2, priority)
+            print(gwi)
+            self.matrixes_GWI[index].append(gwi)
 
         if (self.choose_method == 1) and (self.have_subcriteria):
             if not self.multiple_experts:
@@ -254,6 +277,8 @@ class GUIWindow(QWidget):
         print("The best choice is:", best_choice)
         print("wartości CR")
         print(self.matrixes_CR)
+        print("wartości GWI")
+        print(self.matrixes_GWI)
 
         # Plot
         ax_x = []
