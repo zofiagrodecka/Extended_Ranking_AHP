@@ -20,6 +20,8 @@ class AHPCalculator:
         self.multiple_experts_results = []
         self.subcriteria_comparison = None
         self.subcriteria_priorities = []
+        self.matrixes_CR = []
+        self.matrixes_GWI = []
 
     def initialize_alternatives(self, alternatives_number, alternatives):
         self.alternatives_names = alternatives
@@ -189,7 +191,7 @@ class AHPCalculator:
         CI = (max_eig - n)/n-1
         RI = self.ri[n]
         CR = CI/RI
-        return CR
+        return np.abs(CR)
 
     def count_GWI(self, matrix, priority):
         res = 0
