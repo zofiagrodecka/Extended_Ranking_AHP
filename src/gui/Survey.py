@@ -11,9 +11,9 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_template import FigureCanvas
 from matplotlib.figure import Figure
 
-class Questionary(QWidget):
+class Survey(QWidget):
     def __init__(self):
-        super(Questionary, self).__init__()
+        super(Survey, self).__init__()
         self.criteria_number = 0
         self.alternative_number = 0
         self.criteria = []
@@ -24,7 +24,7 @@ class Questionary(QWidget):
 
     def initWindow(self):
         self.setGeometry(200, 200, 500, 230)
-        self.setWindowTitle("AHP-Questionary")
+        self.setWindowTitle("AHP-Survey")
         self.setWindowIcon(QIcon('pathology.png'))
         self.setStyleSheet("background-color:#b8b8b8")
         self.title = QLabel(self)

@@ -1,13 +1,13 @@
 import sys
 from PyQt5.QtWidgets import QApplication
 from src.gui.MainWindow import GUIWindow
-from src.gui.Questionary import Questionary
+from src.gui.Survey import Survey
 
 
 def main(arg):
     app = QApplication(arg)
     gui = GUIWindow()
-    quest = Questionary()
+    quest = Survey()
     sys.exit(app.exec_())
 
 
