@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QLabel, QWidget, QMainWindow, QHBoxLayout, QVBoxLayout, QPushButton, \
-    QFileDialog, QLineEdit, QSlider, QGridLayout, QRadioButton
+    QFileDialog, QLineEdit, QSlider, QGridLayout, QRadioButton, QApplication
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
 import csv
@@ -10,6 +10,9 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_template import FigureCanvas
 from matplotlib.figure import Figure
+
+from src.gui.ExpertCalculations import ExpertCalculations
+from src.gui.ResultsWindow import ResultsWindow
 
 
 class GUIWindow(QWidget):
@@ -30,6 +33,7 @@ class GUIWindow(QWidget):
         self.matrixes_GWI = []
         self.matrixes_all_criteria = []
         self.initGUI()
+        self.results_window = ResultsWindow()
 
     def initGUI(self):
         self.setGeometry(200, 200, 500, 230)
@@ -79,9 +83,9 @@ class GUIWindow(QWidget):
         file_name = QFileDialog()
         file_name.setFileMode(QFileDialog.ExistingFiles)
         files, types = file_name.getOpenFileNames(self, "Open files", "")
-        print(files)
+        # print(files)
         self.AHPCalculator = AHPCalculator(len(files))
-        if len(files) == 1: # not multiple experts
+        if len(files) == 1:  # not multiple experts
             self.read_file(files[0], 0)
         else:
             self.multiple_experts = True
@@ -101,7 +105,7 @@ class GUIWindow(QWidget):
         self.criteria_number = len(filtered_criteria)
         c = self.criteria_number
         self.criteria = result[0][0:c]
-        print("Criteria:", self.criteria)
+        # print("Criteria:", self.criteria)
         subcriteria_number = 0
         self.have_subcriteria = False
         for i in range(1, c+1):
@@ -116,21 +120,17 @@ class GUIWindow(QWidget):
                 for j in range(len(row)):
                     self.all_criteria.append(row[j])
             self.subcriteria.append(row)
-        print("Subriteria:", self.subcriteria)
-        print("All criteria", self.all_criteria)
+        # print("Subriteria:", self.subcriteria)
+        # print("All criteria", self.all_criteria)
         self.matrixes_all_criteria.append(self.all_criteria)
         filtered_alternatives = list(filter(None, result[c+1]))
         self.alternative_number = len(filtered_alternatives)
         a = self.alternative_number
         l = len(result)
         self.alternatives = result[c+1][0:a]
-        print("Alternatives:", self.alternatives)
+        # print("Alternatives:", self.alternatives)
         self.AHPCalculator.initialize_alternatives(self.alternative_number, deepcopy(self.alternatives))
-        if not self.multiple_experts:
-            if self.have_subcriteria:
-                self.AHPCalculator.initialize_criteria(len(self.all_criteria), deepcopy(self.all_criteria))
-            else:
-                self.AHPCalculator.initialize_criteria(len(self.all_criteria), deepcopy(self.all_criteria))
+        self.AHPCalculator.initialize_criteria(len(self.all_criteria), deepcopy(self.all_criteria))
         matrixes = [[]] * subcriteria_number
         self.matrixes_CR.append([])
         self.matrixes_GWI.append([])
@@ -159,8 +159,8 @@ class GUIWindow(QWidget):
                 matrixes[i].append(r.astype("float"))
             beg = beg + a
             matrixes[i] = numpy.matrix(matrixes[i])
-            print("Comparison matrix - criterium ", self.all_criteria[i])
-            print(matrixes[i])
+            # print("Comparison matrix - criterium ", self.all_criteria[i])
+            # print(matrixes[i])
             matrix = deepcopy(matrixes[i])
             matrix2 = deepcopy(matrixes[i])
             if not self.multiple_experts:
@@ -172,20 +172,20 @@ class GUIWindow(QWidget):
             gwi = -1
             if(self.choose_method == 1 or self.choose_method == 3):
                 priority_gwi = self.AHPCalculator.calculate_evm_priority(matrix)
-                print(priority_gwi)
+                # print(priority_gwi)
                 priority_gwi = numpy.array(priority_gwi)
                 # print(matrixes[i])
                 priority = []
                 for x in priority_gwi:
-                    print(x[0])
+                    # print(x[0])
                     priority.append(x[0])
-                print(priority)
+                # print(priority)
                 gwi = self.AHPCalculator.count_GWI(matrix2, priority)
             else:
                 priority = self.AHPCalculator.calculate_inc_gmm_alt_priority(matrix)
-                print(priority)
+                # print(priority)
                 gwi = self.AHPCalculator.count_GWI(matrix2, priority)
-            print(gwi)
+            # print(gwi)
             self.matrixes_GWI[index].append(gwi)
 
         if (self.choose_method == 1) and (self.have_subcriteria):
@@ -213,8 +213,8 @@ class GUIWindow(QWidget):
             criteria_comparison[i] = r.astype("float")
             beg+=1
         criteria_comparison = numpy.array(criteria_comparison)
-        print("Criteria comarison matrix - main")
-        print(criteria_comparison)
+        # print("Criteria comarison matrix - main")
+        # print(criteria_comparison)
         if self.have_subcriteria:
             subcriteria_comparison = [None for _ in range(c)]
             for i in range(c):
@@ -229,12 +229,12 @@ class GUIWindow(QWidget):
                                 r[x] = 0
                         subcriteria_comparison[i].append(r.astype("float"))
                         beg = beg + 1
-                print("Subcriteria comparison - criteria: ", self.criteria[i])
-                print(subcriteria_comparison[i])
+                # print("Subcriteria comparison - criteria: ", self.criteria[i])
+                # print(subcriteria_comparison[i])
             if not self.multiple_experts:
                 self.AHPCalculator.subcriteria_comparison = deepcopy(subcriteria_comparison)
             else:
-                print('subcriteria comparison', subcriteria_comparison)
+                # print('subcriteria comparison', subcriteria_comparison)
                 self.AHPCalculator.append_experts_subcriteria(deepcopy(subcriteria_comparison))
         else:
             self.AHPCalculator.append_experts_subcriteria(deepcopy(self.subcriteria))
@@ -244,7 +244,7 @@ class GUIWindow(QWidget):
         else:
             self.AHPCalculator.append_experts_criteria(deepcopy(criteria_comparison))
 
-        print("Criteria comparison:", criteria_comparison)
+        # print("Criteria comparison:", criteria_comparison)
 
     def processing(self):
         print("processing")
@@ -260,6 +260,15 @@ class GUIWindow(QWidget):
                 total = self.AHPCalculator.run_subcriteria_evm_method()
             elif self.choose_method == 6:
                 total = self.AHPCalculator.run_subcriteria_gmm_method()
+            expert = ExpertCalculations(deepcopy(self.AHPCalculator.criteria_names),
+                                        deepcopy(self.AHPCalculator.alternatives_names),
+                                        deepcopy(self.AHPCalculator.criteria_comparison),
+                                        deepcopy(self.AHPCalculator.alternative_matrixes),
+                                        deepcopy(self.AHPCalculator.criteria_priorities),
+                                        deepcopy(self.AHPCalculator.alternatives_priorities),
+                                        deepcopy(self.AHPCalculator.subcriteria_comparison),
+                                        deepcopy(self.AHPCalculator.subcriteria_priorities))
+            self.results_window.add_expert(deepcopy(expert))
         else:
             for i in range(len(self.choose_methods)):
                 method = self.choose_methods[i]
@@ -273,6 +282,18 @@ class GUIWindow(QWidget):
                     self.AHPCalculator.multiple_experts_results.append(self.AHPCalculator.run_multiple_experts_subcriteria_EVM_method(i))
                 elif method == 6:
                     self.AHPCalculator.multiple_experts_results.append(self.AHPCalculator.run_multiple_experts_subcriteria_GMM_method(i))
+                expert = ExpertCalculations(deepcopy(self.AHPCalculator.criteria_names),
+                                            deepcopy(self.AHPCalculator.alternatives_names),
+                                            deepcopy(self.AHPCalculator.multiple_experts_criteria[i]),
+                                            deepcopy(self.AHPCalculator.multiple_experts_alternatives[i]),
+                                            deepcopy(self.AHPCalculator.criteria_priorities),
+                                            deepcopy(self.AHPCalculator.alternatives_priorities),
+                                            deepcopy(self.AHPCalculator.multiple_experts_subcriteria[i]),
+                                            deepcopy(self.AHPCalculator.subcriteria_priorities)
+                                            )
+                # self.results_window.add_expert(deepcopy(expert))
+                self.results_window.experts.append(deepcopy(expert))
+            print("DUP: ", self.results_window.experts[0].criteria_names == self.results_window.experts[1].criteria_names)
             total = self.AHPCalculator.synthesize_multiple_experts_result()
         print("Total:", total)
         best_choice = self.AHPCalculator.alternatives_names[numpy.argmax(total)]
@@ -289,22 +310,18 @@ class GUIWindow(QWidget):
         for i in range(self.alternative_number):
             ax_x.append(i)
         self.figure = plt.figure()
-        objects = self.AHPCalculator.alternatives_names
         y_pos = numpy.arange(self.alternative_number)
         self.plot = self.figure.add_subplot(111)
         self.plot.bar(y_pos, total)
         self.plot.set_xticks(ax_x)
         self.plot.set_xticklabels(self.alternatives)
         self.plot.set_ylabel('Priorytet')
-        self.plot.set_title('Ranking AHP domów w okolicy Krakowa')
-        #self.plot.show()
+        self.plot.set_title('Wyniki rankingu')
 
         self.setGeometry(200, 50, 800, 900)
         self.layout.itemAt(2).widget().deleteLater()
         self.layout.itemAt(3).widget().deleteLater()
         self.layout.itemAt(4).widget().deleteLater()
-        #self.layout.itemAt(5).widget().deleteLater()
-        #self.layout.itemAt(6).widget().deleteLater()
         sub_message = "Najlepszą opcją jest " + best_choice
         self.subtitle_p.setText(sub_message)
 
@@ -341,6 +358,10 @@ class GUIWindow(QWidget):
 
         experts_string = []
 
+        print("INDEXES")
+        print(self.matrixes_CR)
+        print(self.matrixes_GWI)
+
         for y in range(len(self.matrixes_all_criteria)):
             criteria_names = self.matrixes_all_criteria[y]
             criteria_CR = self.matrixes_CR[y]
@@ -359,6 +380,9 @@ class GUIWindow(QWidget):
             label.setFixedSize(800,100)
             label.setWordWrap(True)
             self.layout.addWidget(label)
+
+        self.results_window.show_experts()
+        self.results_window.show()
 
     def state(self, b):
         if b.text() == "EVM":
