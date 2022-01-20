@@ -6,7 +6,7 @@ from src.gui.Survey import Survey
 
 def main(arg):
     app = QApplication(arg)
-    gui = GUIWindow()
+    #gui = GUIWindow()
     quest = Survey()
     sys.exit(app.exec_())
 
