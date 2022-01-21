@@ -8,6 +8,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.uic.properties import QtWidgets
 import numpy as np
 
+from src.app.AHPCalculator import AHPCalculator
+
 
 class ResultsWindow(QWidget):
     def __init__(self):
@@ -61,6 +63,7 @@ class ResultsWindow(QWidget):
         self.right_counter = 0
         self.left_counter = 0
         self.main_criteria_names = []
+        self.calculator = AHPCalculator(1)
 
     def add_expert(self, expert):
         self.experts.append(expert)
@@ -96,6 +99,10 @@ class ResultsWindow(QWidget):
                 for w in range(len(expert.criteria_names)):
                     for k in range(len(expert.criteria_names), len(expert.criteria_names)+1):
                         self.table_widget.setItem(w, k, QTableWidgetItem(str(round(expert.criteria_priorities[w], 3))))
+                cr = self.calculator.count_CR(expert.criteria_comparison)
+                self.cr_index.setText("CR= " + str(cr))
+                gwi = self.calculator.count_GWI(expert.criteria_comparison, expert.criteria_priorities)
+                self.gwi_index.setText("GWI= " + str(gwi))
             else:  # Porownania alternatyw
                 self.table_widget.setRowCount(len(expert.alternatives_names))
                 self.table_widget.setColumnCount(len(expert.alternatives_names)+1)
@@ -110,6 +117,10 @@ class ResultsWindow(QWidget):
                 for w in range(len(expert.alternatives_names)):
                     for k in range(len(expert.alternatives_names), len(expert.alternatives_names)+1):
                         self.table_widget.setItem(w, k, QTableWidgetItem(str(round(expert.alternatives_priorities[self.table_index-1][w], 3))))
+                cr = self.calculator.count_CR(expert.alternatives_comparisons[index-1])
+                self.cr_index.setText("CR= " + str(cr))
+                gwi = self.calculator.count_GWI(expert.alternatives_comparisons[index-1],expert.alternatives_priorities[self.table_index-1])
+                self.gwi_index.setText("GWI= " + str(gwi))
         else:
             if self.show_subcriteria:  # Wyswietlam podkryteria
                 self.table_widget.setRowCount(len(expert.subcriteria[self.subcriteria_index]))
@@ -124,6 +135,15 @@ class ResultsWindow(QWidget):
                 for w in range(len(expert.subcriteria[self.subcriteria_index])):
                     for k in range(len(expert.subcriteria[self.subcriteria_index]), len(expert.subcriteria[self.subcriteria_index]) + 1):
                         self.table_widget.setItem(w, k, QTableWidgetItem(str(round(expert.subcriteria_priorities[self.subcriteria_index][w], 3))))
+                if len(expert.subcriteria[self.subcriteria_index]) >= 3:
+                    cr = self.calculator.count_CR(expert.subcriteria[self.subcriteria_index])
+                    self.cr_index.setText("CR= " + str(cr))
+                    gwi = self.calculator.count_GWI(expert.subcriteria[self.subcriteria_index],
+                                                    expert.subcriteria_priorities[self.subcriteria_index])
+                    self.gwi_index.setText("GWI= " + str(gwi))
+                else:
+                    self.cr_index.setText("CR= infinity")
+                    self.gwi_index.setText("CR= infinity")
             elif index == 0:  # Porownania kryteriow
                 self.table_widget.setRowCount(len(expert.subcriteria))
                 self.table_widget.setColumnCount(len(expert.subcriteria) + 1)
@@ -152,6 +172,10 @@ class ResultsWindow(QWidget):
                         self.table_widget.setItem(w, k, QTableWidgetItem(str(round(expert.criteria_priorities[w], 3))))
                 self.show_subcriteria = True
                 self.subcriteria_index = 0
+                cr = self.calculator.count_CR(expert.criteria_comparison)
+                self.cr_index.setText("CR= " + str(cr))
+                gwi = self.calculator.count_GWI(expert.criteria_comparison, expert.criteria_priorities)
+                self.gwi_index.setText("GWI= " + str(gwi))
             else:
                 self.table_widget.setRowCount(len(expert.alternatives_names))
                 self.table_widget.setColumnCount(len(expert.alternatives_names) + 1)
@@ -168,6 +192,11 @@ class ResultsWindow(QWidget):
                     for k in range(len(expert.alternatives_names), len(expert.alternatives_names) + 1):
                         self.table_widget.setItem(w, k, QTableWidgetItem(
                             str(round(expert.alternatives_priorities[self.table_index - 1][w], 3))))
+                cr = self.calculator.count_CR(expert.alternatives_comparisons[index - 1])
+                self.cr_index.setText("CR= " + str(cr))
+                gwi = self.calculator.count_GWI(expert.alternatives_comparisons[index - 1],
+                                                expert.alternatives_priorities[self.table_index - 1])
+                self.gwi_index.setText("GWI= " + str(gwi))
         self.setTableSize()
         #self.layout.addWidget(self.table_widget, 2, 0, 4, 2, Qt.AlignCenter)
         #self.setLayout(self.layout)
@@ -274,3 +303,6 @@ class ResultsWindow(QWidget):
             self.left_button.setDisabled(False)
         self.create_table(self.table_index, self.experts[self.experts_index])
         return
+
+    #def calculate_CR(self):
+
