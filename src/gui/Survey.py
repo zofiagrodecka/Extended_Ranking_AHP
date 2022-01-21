@@ -293,5 +293,4 @@ class Survey(QWidget):
 
 
     def calculate_AHP(self):
-        gui = GUIWindow()
-        self.close()
+        self.gui = GUIWindow()
