@@ -120,8 +120,8 @@ class GUIWindow(QWidget):
                 for j in range(len(row)):
                     self.all_criteria.append(row[j])
             self.subcriteria.append(row)
-        # print("Subriteria:", self.subcriteria)
-        # print("All criteria", self.all_criteria)
+        print("Subriteria:", self.subcriteria)
+        print("All criteria", self.all_criteria)
         self.matrixes_all_criteria.append(self.all_criteria)
         filtered_alternatives = list(filter(None, result[c+1]))
         self.alternative_number = len(filtered_alternatives)
@@ -130,7 +130,11 @@ class GUIWindow(QWidget):
         self.alternatives = result[c+1][0:a]
         # print("Alternatives:", self.alternatives)
         self.AHPCalculator.initialize_alternatives(self.alternative_number, deepcopy(self.alternatives))
-        self.AHPCalculator.initialize_criteria(len(self.all_criteria), deepcopy(self.all_criteria))
+        if not self.multiple_experts:
+            self.AHPCalculator.initialize_criteria(len(self.all_criteria), deepcopy(self.all_criteria))
+        else:
+            self.AHPCalculator.multiple_experts_criteria_names.append(deepcopy(self.all_criteria))
+            self.criteria_number = len(self.all_criteria)
         matrixes = [[]] * subcriteria_number
         self.matrixes_CR.append([])
         self.matrixes_GWI.append([])
@@ -282,28 +286,16 @@ class GUIWindow(QWidget):
                     self.AHPCalculator.multiple_experts_results.append(self.AHPCalculator.run_multiple_experts_subcriteria_EVM_method(i))
                 elif method == 6:
                     self.AHPCalculator.multiple_experts_results.append(self.AHPCalculator.run_multiple_experts_subcriteria_GMM_method(i))
-                if self.have_subcriteria:
-                    expert = ExpertCalculations(deepcopy(self.AHPCalculator.criteria_names),
-                                            deepcopy(self.AHPCalculator.alternatives_names),
-                                            deepcopy(self.AHPCalculator.multiple_experts_criteria[i]),
-                                            deepcopy(self.AHPCalculator.multiple_experts_alternatives[i]),
-                                            deepcopy(self.AHPCalculator.criteria_priorities),
-                                            deepcopy(self.AHPCalculator.alternatives_priorities),
-                                            deepcopy(self.AHPCalculator.multiple_experts_subcriteria[i]),
-                                            deepcopy(self.AHPCalculator.subcriteria_priorities)
-                                            )
-                    self.results_window.add_expert(deepcopy(expert))
-                else:
-                    expert = ExpertCalculations(deepcopy(self.AHPCalculator.criteria_names),
-                                                deepcopy(self.AHPCalculator.alternatives_names),
-                                                deepcopy(self.AHPCalculator.multiple_experts_criteria[i]),
-                                                deepcopy(self.AHPCalculator.multiple_experts_alternatives[i]),
-                                                deepcopy(self.AHPCalculator.criteria_priorities),
-                                                deepcopy(self.AHPCalculator.alternatives_priorities),
-                                                deepcopy(self.AHPCalculator.multiple_experts_subcriteria[i].subcriteria),
-                                                deepcopy(self.AHPCalculator.subcriteria_priorities)
-                                                )
-                    self.results_window.add_expert(deepcopy(expert))
+                expert = ExpertCalculations(deepcopy(self.AHPCalculator.multiple_experts_criteria_names[i]),
+                                        deepcopy(self.AHPCalculator.alternatives_names),
+                                        deepcopy(self.AHPCalculator.multiple_experts_criteria[i]),
+                                        deepcopy(self.AHPCalculator.multiple_experts_alternatives[i]),
+                                        deepcopy(self.AHPCalculator.criteria_priorities),
+                                        deepcopy(self.AHPCalculator.alternatives_priorities),
+                                        deepcopy(self.AHPCalculator.multiple_experts_subcriteria[i]),
+                                        deepcopy(self.AHPCalculator.subcriteria_priorities)
+                                        )
+                self.results_window.add_expert(deepcopy(expert))
                 # self.results_window.experts.append(deepcopy(expert))
             print("DUP: ", self.results_window.experts[0].criteria_names == self.results_window.experts[1].criteria_names)
             total = self.AHPCalculator.synthesize_multiple_experts_result()

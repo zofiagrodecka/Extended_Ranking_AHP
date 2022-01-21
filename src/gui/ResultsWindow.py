@@ -58,6 +58,7 @@ class ResultsWindow(QWidget):
         self.right_subcriteria = False
         self.left_subcriteria = False
         self.show_subcriteria = False
+        self.right_counter = 0
         self.left_counter = 0
         self.main_criteria_names = []
 
@@ -150,6 +151,7 @@ class ResultsWindow(QWidget):
                     for k in range(len(self.main_criteria_names), len(self.main_criteria_names) + 1):
                         self.table_widget.setItem(w, k, QTableWidgetItem(str(round(expert.criteria_priorities[w], 3))))
                 self.show_subcriteria = True
+                self.subcriteria_index = 0
             else:
                 self.table_widget.setRowCount(len(expert.alternatives_names))
                 self.table_widget.setColumnCount(len(expert.alternatives_names) + 1)
@@ -198,6 +200,7 @@ class ResultsWindow(QWidget):
                 self.experts_index -= 1
                 self.table_index = len(self.experts[self.experts_index].alternatives_comparisons)
                 self.left_button.setDisabled(False)
+                self.right_counter = 0
                 self.title.setText("Ekspert " + str(self.experts_index + 1))
                 if self.table_index == 0:
                     self.table_header.setText("Kryteria")
@@ -230,6 +233,9 @@ class ResultsWindow(QWidget):
         self.create_table(self.table_index, self.experts[self.experts_index])
 
     def right_on_click(self):
+        if self.experts[self.experts_index].subcriteria is not None and self.table_index == 0 and self.right_counter == 0:
+            self.show_subcriteria = True
+            self.right_counter += 1
         if not self.show_subcriteria:
             self.table_index += 1
             print(self.table_index)
@@ -262,7 +268,9 @@ class ResultsWindow(QWidget):
             if self.subcriteria_index >= len(self.experts[self.experts_index].subcriteria):
                 self.show_subcriteria = False
                 self.right_on_click()
+                return
             else:
                 self.table_header.setText(self.main_criteria_names[self.subcriteria_index])
             self.left_button.setDisabled(False)
         self.create_table(self.table_index, self.experts[self.experts_index])
+        return
