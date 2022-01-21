@@ -188,7 +188,7 @@ class ResultsWindow(QWidget):
         self.setLayout(self.layout)
 
     def left_on_click(self):
-        if self.left_counter == 0 and self.table_index == 1:
+        if self.experts[self.experts_index].subcriteria is not None and self.left_counter == 0 and self.table_index == 1:
             self.show_subcriteria = True
             self.subcriteria_index = len(self.experts[self.experts_index].subcriteria)
             self.left_counter += 1
