@@ -34,7 +34,7 @@ class Survey(QWidget):
         self.initWindow()
 
     def initWindow(self):
-        self.setGeometry(200, 200, 500, 230)
+        self.setGeometry(200, 200, 500, 90)
         self.setWindowTitle("AHP-Survey")
         self.setWindowIcon(QIcon('pathology.png'))
         self.setStyleSheet("background-color:#b8b8b8")
@@ -52,7 +52,7 @@ class Survey(QWidget):
         self.calculate.setGeometry(170, 250, 150, 30)
         self.calculate.clicked.connect(self.calculate_AHP)
         self.layout = QVBoxLayout()
-        self.layout.setAlignment(Qt.AlignTop)
+        #self.layout.setAlignment(Qt.AlignTop)
         self.layout.addWidget(self.title)
         self.layout.addWidget(self.create)
         self.layout.addWidget(self.calculate)
@@ -64,7 +64,8 @@ class Survey(QWidget):
         self.layout.itemAt(1).widget().deleteLater()
         self.load = QPushButton("załaduj plik z ankietą", self)
         self.load.setStyleSheet("background:#3f3f3f; color:#d1d1d1; text-transform:uppercase;")
-        self.load.setGeometry(170, 250, 150, 30)
+        self.load.setGeometry(170, 270, 150, 30)
+        self.load.move(0, 40)
         self.load.clicked.connect(self.load_file)
         self.layout.addWidget(self.load)
 
@@ -86,13 +87,13 @@ class Survey(QWidget):
         self.criteria = result[0][0:c]
         print("Criteria:", self.criteria)
         subcriteria_number = 0
-        for i in range(1, c+1):
+        for i in range(1, c + 1):
             row = list(filter(None, result[i]))
             print(row)
-            if(len(row) == 0):
+            if (len(row) == 0):
                 row = None
                 subcriteria_number = subcriteria_number + 1
-                self.all_criteria.append(self.criteria[i-1])
+                self.all_criteria.append(self.criteria[i - 1])
             else:
                 subcriteria_number = subcriteria_number + len(row)
                 self.have_subcriteria = True
@@ -107,7 +108,7 @@ class Survey(QWidget):
         l = len(result)
         self.alternatives = result[c + 1][0:a]
         print("Alternatives:", self.alternatives)
-        self.questions_todo = self.alternative_number * (self.alternative_number - 1)/2
+        self.questions_todo = self.alternative_number * (self.alternative_number - 1) / 2
         self.subcriteria_number = len(self.all_criteria)
         for i in range(self.subcriteria_number):
             m = [['' for i in range(self.alternative_number)] for j in range(self.alternative_number)]
@@ -116,28 +117,28 @@ class Survey(QWidget):
             self.comparison_matrix.append(m)
         print(self.comparison_matrix)
         self.layout.itemAt(1).widget().deleteLater()
-        self.start = QPushButton("rozpocznij ankietę",self)
+        self.start = QPushButton("rozpocznij ankietę", self)
         self.start.setStyleSheet("background:#3f3f3f; color:#d1d1d1; text-transform:uppercase;")
         self.start.setGeometry(170, 250, 150, 30)
         self.start.clicked.connect(self.next)
         self.layout.addWidget(self.start)
 
     def next(self):
-        if(self.criteria_done == self.subcriteria_number):
+        if (self.criteria_done == self.subcriteria_number):
             print(self.line_which.text())
             print(self.line_num.text())
             if (self.line_which.text() == self.alternatives[self.x]):
                 num = int(self.line_num.text())
                 print(num)
-                self.comparison_matrix[self.criteria_done-1][self.x][self.y] = num
-                self.comparison_matrix[self.criteria_done-1][self.y][self.x] = 1/num
-                print(self.comparison_matrix[self.criteria_done-1][self.x][self.y])
+                self.comparison_matrix[self.criteria_done - 1][self.x][self.y] = num
+                self.comparison_matrix[self.criteria_done - 1][self.y][self.x] = 1 / num
+                print(self.comparison_matrix[self.criteria_done - 1][self.x][self.y])
             elif (self.line_which.text() == self.alternatives[self.y]):
                 num = int(self.line_num.text())
                 print(num)
-                self.comparison_matrix[self.criteria_done-1][self.y][self.x] = num
-                self.comparison_matrix[self.criteria_done-1][self.x][self.y] = 1 / num
-                print(self.comparison_matrix[self.criteria_done-1][self.x][self.y])
+                self.comparison_matrix[self.criteria_done - 1][self.y][self.x] = num
+                self.comparison_matrix[self.criteria_done - 1][self.x][self.y] = 1 / num
+                print(self.comparison_matrix[self.criteria_done - 1][self.x][self.y])
             else:
                 print("NayNay")
             self.layout.itemAt(1).widget().deleteLater()
@@ -145,21 +146,25 @@ class Survey(QWidget):
             self.layout.itemAt(3).widget().deleteLater()
             self.layout.itemAt(4).widget().deleteLater()
             self.layout.itemAt(5).widget().deleteLater()
+            self.layout.itemAt(6).widget().deleteLater()
+            self.layout.itemAt(7).widget().deleteLater()
             self.end_message = QLabel(self)
             self.end_message.setText("Koniec ankiety")
             self.end_message.setStyleSheet("color:black; font-size:15px;text-transform:uppercase; text-align:center;")
             self.end_message.setGeometry(0, 50, 500, 50)
             self.end_message.setAlignment(Qt.AlignCenter)
+            self.name_file = QLabel("wprowadź ścieżkę i nazwę dla pliku:")
             self.new_file = QLineEdit()
-            self.save_button = QPushButton("zapisz plik",self)
+            self.save_button = QPushButton("zapisz plik", self)
             self.save_button.setStyleSheet("background:#3f3f3f; color:#d1d1d1; text-transform:uppercase;")
             self.save_button.setGeometry(170, 250, 150, 30)
             self.save_button.clicked.connect(self.save_file)
             self.layout.addWidget(self.end_message)
+            self.layout.addWidget(self.name_file)
             self.layout.addWidget(self.new_file)
             self.layout.addWidget(self.save_button)
             print(self.comparison_matrix)
-        elif (self.criteria_done == 0 and self.questions_done ==0):
+        elif (self.criteria_done == 0 and self.questions_done == 0):
             self.layout.itemAt(1).widget().deleteLater()
             self.questions_list = self.comparison_list()
             self.crit_label = QLabel(self)
@@ -170,24 +175,30 @@ class Survey(QWidget):
             self.ques_label = QLabel(self)
             self.x = self.questions_list[self.questions_done][0]
             self.y = self.questions_list[self.questions_done][1]
-            self.ques_label.setText("W skali od 1-9 którą opcję Pan/Pani preferuje: " + self.alternatives[self.x] + " czy " + self.alternatives[self.y] + "?")
+            self.ques_label.setText(
+                "W skali od 1-9 którą opcję Pan/Pani preferuje: " + self.alternatives[self.x] + " czy " +
+                self.alternatives[self.y] + "?")
             self.ques_label.setStyleSheet("color:black; font-size:15px;text-align:center;")
             self.ques_label.setGeometry(0, 50, 500, 50)
             self.ques_label.setAlignment(Qt.AlignCenter)
-            self.next_button = QPushButton("dalej",self)
+            self.next_button = QPushButton("dalej", self)
             self.next_button.setStyleSheet("background:#3f3f3f; color:#d1d1d1; text-transform:uppercase;")
             self.next_button.setGeometry(170, 250, 150, 30)
             self.next_button.clicked.connect(self.next)
             self.line_which = QLineEdit()
             self.line_num = QLineEdit()
+            self.option = QLabel("opcja", self)
+            self.score = QLabel("ocena", self)
             self.layout.addWidget(self.crit_label)
             self.layout.addWidget(self.ques_label)
-            self.layout.addWidget(self.next_button)
+            #self.layout.addWidget(self.next_button)
+            self.layout.addWidget(self.option)
             self.layout.addWidget(self.line_which)
+            self.layout.addWidget(self.score)
             self.layout.addWidget(self.line_num)
             self.layout.addWidget(self.next_button)
             self.questions_done = self.questions_done + 1
-            if(self.questions_done == self.questions_todo):
+            if (self.questions_done == self.questions_todo):
                 self.questions_done = 0
                 self.criteria_done = self.criteria_done + 1
         elif (self.questions_done == 0):
@@ -196,15 +207,15 @@ class Survey(QWidget):
             if (self.line_which.text() == self.alternatives[self.x]):
                 num = int(self.line_num.text())
                 print(num)
-                self.comparison_matrix[self.criteria_done-1][self.x][self.y] = num
-                self.comparison_matrix[self.criteria_done-1][self.y][self.x] = 1 / num
-                print(self.comparison_matrix[self.criteria_done-1][self.x][self.y])
+                self.comparison_matrix[self.criteria_done - 1][self.x][self.y] = num
+                self.comparison_matrix[self.criteria_done - 1][self.y][self.x] = 1 / num
+                print(self.comparison_matrix[self.criteria_done - 1][self.x][self.y])
             elif (self.line_which.text() == self.alternatives[self.y]):
                 num = int(self.line_num.text())
                 print(num)
-                self.comparison_matrix[self.criteria_done-1][self.y][self.x] = num
-                self.comparison_matrix[self.criteria_done-1][self.x][self.y] = 1 / num
-                print(self.comparison_matrix[self.criteria_done-1][self.x][self.y])
+                self.comparison_matrix[self.criteria_done - 1][self.y][self.x] = num
+                self.comparison_matrix[self.criteria_done - 1][self.x][self.y] = 1 / num
+                print(self.comparison_matrix[self.criteria_done - 1][self.x][self.y])
             else:
                 print("NayNay")
             self.line_which.setText("")
@@ -213,9 +224,11 @@ class Survey(QWidget):
             self.crit_label.setText("Kryterium " + self.all_criteria[self.criteria_done])
             self.x = self.questions_list[self.questions_done][0]
             self.y = self.questions_list[self.questions_done][1]
-            self.ques_label.setText("W skali od 1-9 którą opcję Pan/Pani preferuje: " + self.alternatives[self.x] + " czy " + self.alternatives[self.y] + "?")
+            self.ques_label.setText(
+                "W skali od 1-9 którą opcję Pan/Pani preferuje: " + self.alternatives[self.x] + " czy " +
+                self.alternatives[self.y] + "?")
             self.questions_done = self.questions_done + 1
-            if(self.questions_done == self.questions_todo):
+            if (self.questions_done == self.questions_todo):
                 self.questions_done = 0
                 self.criteria_done = self.criteria_done + 1
         else:
@@ -240,7 +253,8 @@ class Survey(QWidget):
             self.x = self.questions_list[self.questions_done][0]
             self.y = self.questions_list[self.questions_done][1]
             self.ques_label.setText(
-                "W skali od 1-9 którą opcję Pan/Pani preferuje: " + self.alternatives[self.x] + " czy " + self.alternatives[
+                "W skali od 1-9 którą opcję Pan/Pani preferuje: " + self.alternatives[self.x] + " czy " +
+                self.alternatives[
                     self.y] + "?")
             self.questions_done = self.questions_done + 1
             if (self.questions_done == self.questions_todo):
@@ -252,17 +266,18 @@ class Survey(QWidget):
         f = open(self.new_file.text() + ".csv", 'w', encoding='UTF8', newline='')
         writer = csv.writer(f, delimiter=';')
         l = len(self.result)
-        for i in range(self.criteria_number+2):
+        for i in range(self.criteria_number + 2):
             writer.writerow(self.result[i])
         for i in range(self.subcriteria_number):
             matrix = self.comparison_matrix[i]
             writer.writerows(matrix)
-        for i in range(self.criteria_number+2,l):
+        for i in range(self.criteria_number + 2, l):
             writer.writerow(self.result[i])
         f.close()
         self.layout.itemAt(1).widget().deleteLater()
         self.layout.itemAt(2).widget().deleteLater()
         self.layout.itemAt(3).widget().deleteLater()
+        self.layout.itemAt(4).widget().deleteLater()
         self.message = QLabel(self)
         self.message.setText("Plik został zapisany")
         self.message.setGeometry(0, 50, 500, 50)
@@ -273,24 +288,23 @@ class Survey(QWidget):
         alt_comp = [[0 for i in range(self.alternative_number)] for j in range(self.alternative_number)]
         for i in range(self.alternative_number):
             for j in range(self.alternative_number):
-                if(i >= j):
+                if (i >= j):
                     alt_comp[i][j] = 1
-        max_p = self.alternative_number * (self.alternative_number - 1)/2
+        max_p = self.alternative_number * (self.alternative_number - 1) / 2
         p = 0
         list = []
         while p < max_p:
-            x = random.randint(0,self.alternative_number-1)
-            y = random.randint(0,self.alternative_number-1)
-            #print(x)
-            #print(y)
-            if(alt_comp[x][y] != 1):
+            x = random.randint(0, self.alternative_number - 1)
+            y = random.randint(0, self.alternative_number - 1)
+            # print(x)
+            # print(y)
+            if (alt_comp[x][y] != 1):
                 new = [x, y]
                 list.append(new)
                 p = p + 1
                 alt_comp[x][y] = 1
         print(list)
         return list
-
 
     def calculate_AHP(self):
         self.gui = GUIWindow()
